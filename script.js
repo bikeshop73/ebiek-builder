@@ -81,6 +81,7 @@ const parts = {
 // IMAGE FOLDERS
 // =====================================
 
+
 const folders = {
   frame: "Frames",
   frontForks: "Forks",
@@ -95,6 +96,7 @@ const folders = {
   lights: "Lights",
   accessories: "Accessories"
 };
+
 
 // =====================================
 // SELECTED PARTS
