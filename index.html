@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Bike Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>E-BIKE BUILDER</h1>
+  <p>BUILD YOUR OWN RIDE</p>
+</header>
+
+<main>
+  <section class="preview">
+    <div class="preview-label">YOUR BUILD</div>
+
+    <!-- BIKE PREVIEW -->
+    <div id="bike-preview">
+      <h2>SUPER73 ZX SE</h2>
+      <p>Your custom bike will appear here.</p>
+    </div>
+
+    <!-- SAVE AND LOAD BUTTONS -->
+    <div id="save-controls">
+      <button onclick="saveBike()">Save Bike</button>
+      <button onclick="showSavedBikes()">My Bikes</button>
+    </div>
+
+    <!-- SAVED BIKES LIST -->
+    <div id="saved-bikes"></div>
+
+  </section>
+
+  <section class="customizer">
+    <h2>Customize your bike</h2>
+
+    <div class="categories">
+      <button onclick="selectCategory('frame')">Frame</button>
+      <button onclick="selectCategory('frontForks')">Front Forks</button>
+      <button onclick="selectCategory('frontWheel')">Front Wheel</button>
+      <button onclick="selectCategory('rearWheel')">Rear Wheel</button>
+      <button onclick="selectCategory('tires')">Tires</button>
+      <button onclick="selectCategory('motor')">Motor</button>
+      <button onclick="selectCategory('handlebars')">Handlebars</button>
+      <button onclick="selectCategory('seat')">Seat</button>
+      <button onclick="selectCategory('battery')">Battery</button>
+      <button onclick="selectCategory('fenders')">Fenders+Plates</button>
+      <button onclick="selectCategory('lights')">Lights</button>
+      <button onclick="selectCategory('accessories')">Accessories</button>
+    </div>
+
+    <div id="parts-list">
+      Select a category to customize.
+    </div>
+
+  </section>
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
