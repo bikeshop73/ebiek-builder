@@ -5,10 +5,10 @@
 
 const parts = {
   frame: [
-    "IMG_5964.png", "IMG_5965.png", "IMG_5966.png",
-    "IMG_5967.png", "IMG_5968.png", "IMG_5969.png",
-    "IMG_5970.png", "IMG_5971.png", "IMG_5972.png",
-    "IMG_5973.png", "IMG_5974.png", "IMG_5987.png"
+    "IMG_5964.PNG", "IMG_5965.PNG", "IMG_5966.PNG",
+    "IMG_5967.PNG", "IMG_5968.PNG", "IMG_5969.PNG",
+    "IMG_5970.PNG", "IMG_5971.PNG", "IMG_5972.PNG",
+    "IMG_5973.PNG", "IMG_5974.PNG", "IMG_5987.PNG"
   ],
 
   frontForks: [
