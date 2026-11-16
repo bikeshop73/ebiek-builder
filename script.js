@@ -82,8 +82,8 @@ const parts = {
 // =====================================
 
 const folders = {
-  frame: "frames",
-  frontForks: "forks",
+  frame: "Frames",
+  frontForks: "Forks",
   frontWheel: "Front Wheels",
   rearWheel: "Front Wheels",
   tires: "Tires",
