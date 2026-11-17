@@ -361,3 +361,8 @@ button:hover {
   }
 
 }
+
+  .bike-canvas canvas {
+    display: block;
+    pointer-events: none;
+  }
