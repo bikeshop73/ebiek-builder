@@ -18,8 +18,10 @@
 </header>
 
 <main>
+
   <section class="preview">
     <div class="preview-label">YOUR BUILD</div>
+
     <div id="bike-preview">
       <h2>SUPER73 ZX SE</h2>
       <p>Your custom bike will appear here.</p>
@@ -29,44 +31,27 @@
       <button onclick="saveBike()">Save Bike</button>
       <button onclick="saveBikeAsNew()">Save As New</button>
     </div>
+
     <p id="editing-status"></p>
   </section>
 
-<div class="frame-adjustments">
-  <h3>Frame Color</h3>
+  <section class="frame-adjustments">
+    <h2>Frame Color</h2>
 
-  <label for="frame-hue">Hue</label>
-  <input
-    type="range"
-    id="frame-hue"
-    min="0"
-    max="360"
-    value="0"
-    step="1"
-  >
+    <label for="frame-hue">Hue</label>
+    <input type="range" id="frame-hue"
+      min="0" max="360" value="0" step="1">
 
-  <label for="frame-saturation">Saturation</label>
-  <input
-    type="range"
-    id="frame-saturation"
-    min="0"
-    max="200"
-    value="100"
-    step="1"
-  >
+    <label for="frame-saturation">Saturation</label>
+    <input type="range" id="frame-saturation"
+      min="0" max="200" value="100" step="1">
 
-  <label for="frame-brightness">Brightness</label>
-  <input
-    type="range"
-    id="frame-brightness"
-    min="0"
-    max="200"
-    value="100"
-    step="1"
-  >
-</div>
+    <label for="frame-brightness">Brightness</label>
+    <input type="range" id="frame-brightness"
+      min="0" max="200" value="100" step="1">
 
-    <button class="reset-colors" onclick="resetFrameAdjustments()">
+    <button class="reset-colors"
+      onclick="resetFrameAdjustments()">
       Reset Adjustments
     </button>
   </section>
@@ -89,7 +74,9 @@
       <button onclick="selectCategory('accessories')">Accessories</button>
     </div>
 
-    <div id="parts-list">Select a category to customize.</div>
+    <div id="parts-list">
+      Select a category to customize.
+    </div>
   </section>
 
   <section class="garage">
@@ -100,10 +87,12 @@
       </div>
       <button onclick="showSavedBikes()">Refresh Garage</button>
     </div>
+
     <div id="saved-bikes">
       <p>Your garage is empty. Save a bike to get started.</p>
     </div>
   </section>
+
 </main>
 
 <script src="script.js"></script>
