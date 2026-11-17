@@ -208,45 +208,92 @@ function getLayerPosition(category, position) {
 // =====================================
 
 
-function addColorOverlay(canvas, source, position, color, zIndex) {
-  const overlay = document.createElement("div");
 
-  overlay.className = "color-overlay";
+// =====================================
+// PIXEL-BASED COLORING
+// =====================================
 
-  overlay.style.position = "absolute";
-  overlay.style.left = position.left;
-  overlay.style.top = position.top;
-  overlay.style.width = position.width;
-  overlay.style.height = position.height;
+function createColoredLayer(source, color, position, zIndex) {
 
-  overlay.style.backgroundColor = color;
+  const image = new Image();
+  image.src = source;
 
-  overlay.style.maskImage = `url("${source}")`;
-  overlay.style.webkitMaskImage = `url("${source}")`;
+  const canvas = document.createElement("canvas");
 
-  overlay.style.maskSize = "contain";
-  overlay.style.webkitMaskSize = "contain";
+  canvas.className = "color-overlay";
 
-  overlay.style.maskPosition = "center";
-  overlay.style.webkitMaskPosition = "center";
+  Object.assign(canvas.style, {
+    position: "absolute",
+    left: position.left,
+    top: position.top,
+    width: position.width,
+    height: position.height,
+    objectFit: "contain",
+    zIndex: String(zIndex),
+    pointerEvents: "none"
+  });
 
-  overlay.style.maskRepeat = "no-repeat";
-  overlay.style.webkitMaskRepeat = "no-repeat";
+  image.onload = () => {
 
-  // Color Burn blending
-  overlay.style.mixBlendMode = "color-burn";
-  overlay.style.opacity = "0.85";
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
 
-  overlay.style.zIndex = String(zIndex);
+    const ctx = canvas.getContext("2d", {
+      willReadFrequently: true
+    });
 
-  canvas.appendChild(overlay);
+    ctx.drawImage(image, 0, 0);
+
+    const imageData = ctx.getImageData(
+      0, 0, canvas.width, canvas.height
+    );
+
+    const pixels = imageData.data;
+
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+
+    for (let i = 0; i < pixels.length; i += 4) {
+
+      if (pixels[i + 3] === 0) continue;
+
+      // Original brightness
+      const brightness =
+        0.299 * pixels[i] +
+        0.587 * pixels[i + 1] +
+        0.114 * pixels[i + 2];
+
+      // Preserve shading but prevent black areas
+      // from staying completely black.
+      const shade = 0.35 + (brightness / 255) * 0.65;
+
+      pixels[i] = r * shade;
+      pixels[i + 1] = g * shade;
+      pixels[i + 2] = b * shade;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+  image.onerror = () => {
+    console.error("Color image failed:", source);
+  };
+
+  return canvas;
 }
 
 
-
+// =====================================
 // CREATE BIKE CANVAS
+// =====================================
 
-function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) {
+function createBikeCanvas(
+  parent,
+  partsToShow,
+  colorsToShow,
+  thumbnail = false
+) {
 
   const canvas = document.createElement("div");
 
@@ -254,11 +301,13 @@ function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) 
     ? "bike-canvas bike-thumbnail"
     : "bike-canvas";
 
-  canvas.style.position = "relative";
-  canvas.style.width = "100%";
-  canvas.style.maxWidth = thumbnail ? "260px" : "700px";
-  canvas.style.aspectRatio = "1 / 1";
-  canvas.style.margin = "auto";
+  Object.assign(canvas.style, {
+    position: "relative",
+    width: "100%",
+    maxWidth: thumbnail ? "260px" : "700px",
+    aspectRatio: "1 / 1",
+    margin: "auto"
+  });
 
   layers.forEach((layer, layerIndex) => {
 
@@ -274,36 +323,72 @@ function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) 
     filenames.forEach(filename => {
 
       const source = imagePath(category, filename);
-      const position = getLayerPosition(category, layer.position);
 
-      const image = document.createElement("img");
+      const position = getLayerPosition(
+        category,
+        layer.position
+      );
 
-      image.src = source;
-      image.alt = category;
-      image.draggable = false;
+      let color = null;
 
-      Object.assign(image.style, {
-        position: "absolute",
-        left: position.left,
-        top: position.top,
-        width: position.width,
-        height: position.height,
-        objectFit: "contain",
-        zIndex: String(layerIndex + 1)
-      });
-
-      canvas.appendChild(image);
-
-      // FRAME COLOR
       if (category === "frame") {
-        addColorOverlay(
-          canvas,
-          source,
-          position,
-          colorsToShow.frame || "#000000",
-          layerIndex + 1.5
-        );
+        color = colorsToShow.frame || "#000000";
       }
+
+      if (
+        category === "frontWheel" ||
+        category === "rearWheel"
+      ) {
+        color = colorsToShow.accent || "#000000";
+      }
+
+      let element;
+
+      if (color !== null) {
+
+        // Fully recolor the frame or wheel.
+        element = createColoredLayer(
+          source,
+          color,
+          position,
+          layerIndex + 1
+        );
+
+      } else {
+
+        // Keep all other parts unchanged.
+        element = document.createElement("img");
+
+        element.src = source;
+        element.alt = category;
+        element.draggable = false;
+
+        Object.assign(element.style, {
+          position: "absolute",
+          left: position.left,
+          top: position.top,
+          width: position.width,
+          height: position.height,
+          objectFit: "contain",
+          zIndex: String(layerIndex + 1)
+        });
+
+        element.onerror = () => {
+          console.error("Preview image failed:", source);
+        };
+      }
+
+      canvas.appendChild(element);
+
+    });
+
+  });
+
+  parent.appendChild(canvas);
+
+  return canvas;
+}
+
 
       // WHEEL COLOR
       if (
