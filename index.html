@@ -32,36 +32,39 @@
     <p id="editing-status"></p>
   </section>
 
-  <section class="custom-colors">
-    <h2>Frame Color Adjustments</h2>
-    <p>Customize the appearance of your frame.</p>
+<div class="frame-adjustments">
+  <h3>Frame Color</h3>
 
-    <div class="color-slider">
-      <label for="frame-hue">
-        Hue <span id="hue-value">0°</span>
-      </label>
-      <input type="range" id="frame-hue"
-        min="0" max="360" value="0"
-        oninput="changeFrameAdjustment('hue', this.value)">
-    </div>
+  <label for="frame-hue">Hue</label>
+  <input
+    type="range"
+    id="frame-hue"
+    min="0"
+    max="360"
+    value="0"
+    step="1"
+  >
 
-    <div class="color-slider">
-      <label for="frame-saturation">
-        Saturation <span id="saturation-value">100%</span>
-      </label>
-      <input type="range" id="frame-saturation"
-        min="0" max="200" value="100"
-        oninput="changeFrameAdjustment('saturation', this.value)">
-    </div>
+  <label for="frame-saturation">Saturation</label>
+  <input
+    type="range"
+    id="frame-saturation"
+    min="0"
+    max="200"
+    value="100"
+    step="1"
+  >
 
-    <div class="color-slider">
-      <label for="frame-brightness">
-        Brightness <span id="brightness-value">100%</span>
-      </label>
-      <input type="range" id="frame-brightness"
-        min="0" max="200" value="100"
-        oninput="changeFrameAdjustment('brightness', this.value)">
-    </div>
+  <label for="frame-brightness">Brightness</label>
+  <input
+    type="range"
+    id="frame-brightness"
+    min="0"
+    max="200"
+    value="100"
+    step="1"
+  >
+</div>
 
     <button class="reset-colors" onclick="resetFrameAdjustments()">
       Reset Adjustments
