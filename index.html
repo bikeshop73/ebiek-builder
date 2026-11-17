@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,10 +7,10 @@
   <title>E-Bike Builder</title>
 
   <link rel="stylesheet" href="style.css">
-
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="images/icons/icon-512.png">
 </head>
+
 <body>
 
 <header>
@@ -20,28 +19,58 @@
 </header>
 
 <main>
+
   <section class="preview">
     <div class="preview-label">YOUR BUILD</div>
 
-    <!-- BIKE PREVIEW -->
     <div id="bike-preview">
       <h2>SUPER73 ZX SE</h2>
       <p>Your custom bike will appear here.</p>
     </div>
 
-    <!-- SAVE AND LOAD BUTTONS -->
     <div id="save-controls">
       <button onclick="saveBike()">Save Bike</button>
-      <button onclick="showSavedBikes()">My Bikes</button>
+      <button onclick="saveBikeAsNew()">Save as New</button>
     </div>
 
-    <!-- SAVED BIKES LIST -->
-    <div id="saved-bikes"></div>
+    <p id="editing-status">Not currently editing a saved bike.</p>
+  </section>
 
+  <section class="custom-colors">
+    <h2>Custom Colors</h2>
+    <p>Choose the colors for your build.</p>
+
+    <div class="color-controls">
+
+      <div class="color-control">
+        <label for="frame-color">Frame Color</label>
+        <input
+          type="color"
+          id="frame-color"
+          value="#202020"
+          onchange="changeColor('frame', this.value)"
+        >
+      </div>
+
+      <div class="color-control">
+        <label for="accent-color">Wheel Accent Color</label>
+        <input
+          type="color"
+          id="accent-color"
+          value="#d71920"
+          onchange="changeColor('accent', this.value)"
+        >
+      </div>
+
+    </div>
+
+    <button class="reset-colors" onclick="resetColors()">
+      Reset Colors
+    </button>
   </section>
 
   <section class="customizer">
-    <h2>Customize your bike</h2>
+    <h2>Customize Your Bike</h2>
 
     <div class="categories">
       <button onclick="selectCategory('frame')">Frame</button>
@@ -53,7 +82,7 @@
       <button onclick="selectCategory('handlebars')">Handlebars</button>
       <button onclick="selectCategory('seat')">Seat</button>
       <button onclick="selectCategory('battery')">Battery</button>
-      <button onclick="selectCategory('fenders')">Fenders+Plates</button>
+      <button onclick="selectCategory('fenders')">Fenders + Plates</button>
       <button onclick="selectCategory('lights')">Lights</button>
       <button onclick="selectCategory('accessories')">Accessories</button>
     </div>
@@ -61,8 +90,23 @@
     <div id="parts-list">
       Select a category to customize.
     </div>
-
   </section>
+
+  <section class="garage">
+    <div class="garage-heading">
+      <div>
+        <h2>My Garage</h2>
+        <p>Your saved SUPER73 builds.</p>
+      </div>
+
+      <button onclick="showSavedBikes()">Refresh Garage</button>
+    </div>
+
+    <div id="saved-bikes">
+      <p>Your saved bikes will appear here.</p>
+    </div>
+  </section>
+
 </main>
 
 <script src="script.js"></script>
