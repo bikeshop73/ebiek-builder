@@ -1,7 +1,7 @@
 
 /* =========================================
    SUPER73 ZX SE BUILDER
-   COMPLETE SCRIPT
+   COMPLETE REBUILT SCRIPT
 ========================================= */
 
 const parts = {
@@ -109,6 +109,10 @@ const layers = [
   { category: "accessories" }
 ];
 
+/* =========================================
+   IMAGE PATHS
+========================================= */
+
 function imagePath(category, filename) {
   return new URL(
     "images/" + folders[category] + "/" + filename,
@@ -117,21 +121,77 @@ function imagePath(category, filename) {
 }
 
 /* =========================================
-   FRAME COLOR PROCESSING
+   FRAME IMAGE CACHE
+   Original pixels are loaded ONCE.
 ========================================= */
 
-const frameImageCache = new Map();
+const originalFrameCache = new Map();
+
+function loadFramePixels(source) {
+  if (originalFrameCache.has(source)) {
+    return originalFrameCache.get(source);
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+
+        const ctx = canvas.getContext("2d", {
+          willReadFrequently: true
+        });
+
+        ctx.drawImage(image, 0, 0);
+
+        const originalData = ctx.getImageData(
+          0, 0, canvas.width, canvas.height
+        );
+
+        resolve({
+          width: canvas.width,
+          height: canvas.height,
+          data: originalData
+        });
+
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    image.onerror = () => {
+      reject(new Error("Failed to load frame: " + source));
+    };
+
+    image.src = source;
+  });
+
+  originalFrameCache.set(source, promise);
+
+  return promise;
+}
+
+/* =========================================
+   HSL TO RGB
+========================================= */
 
 function hslToRgb(h, s, l) {
   h = ((h % 360) + 360) % 360;
-  s /= 100;
-  l /= 100;
+
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
 
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs((h / 60) % 2 - 1));
   const m = l - c / 2;
 
-  let r = 0, g = 0, b = 0;
+  let r = 0;
+  let g = 0;
+  let b = 0;
 
   if (h < 60) [r, g, b] = [c, x, 0];
   else if (h < 120) [r, g, b] = [x, c, 0];
@@ -147,38 +207,30 @@ function hslToRgb(h, s, l) {
   ];
 }
 
-function colorizeFrameImage(source, colors, callback) {
-  const key = [
-    source,
-    colors.hue,
-    colors.saturation,
-    colors.brightness
-  ].join("|");
+/* =========================================
+   COLORIZE COMPLETE FRAME
+========================================= */
 
-  if (frameImageCache.has(key)) {
-    callback(frameImageCache.get(key));
-    return;
-  }
+function colorizeFrame(source, colors, callback) {
+  loadFramePixels(source)
+    .then(original => {
 
-  const image = new Image();
-
-  image.onload = () => {
-    try {
       const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d", {
+
+      canvas.width = original.width;
+      canvas.height = original.height;
+
+      const ctx = canvas.getContext("2d", {
         willReadFrequently: true
       });
 
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-
-      context.drawImage(image, 0, 0);
-
-      const imageData = context.getImageData(
-        0, 0, canvas.width, canvas.height
+      const output = ctx.createImageData(
+        original.width,
+        original.height
       );
 
-      const pixels = imageData.data;
+      const inputPixels = original.data.data;
+      const outputPixels = output.data;
 
       const target = hslToRgb(
         colors.hue,
@@ -188,49 +240,50 @@ function colorizeFrameImage(source, colors, callback) {
 
       const brightness = colors.brightness / 100;
 
-      for (let i = 0; i < pixels.length; i += 4) {
-        const alpha = pixels[i + 3];
+      for (let i = 0; i < inputPixels.length; i += 4) {
+        const alpha = inputPixels[i + 3];
 
-        if (alpha === 0) continue;
+        // Keep transparent background transparent.
+        outputPixels[i + 3] = alpha;
 
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
+        if (alpha === 0) {
+          outputPixels[i] = 0;
+          outputPixels[i + 1] = 0;
+          outputPixels[i + 2] = 0;
+          continue;
+        }
 
-        // Preserve original image shading.
+        const r = inputPixels[i];
+        const g = inputPixels[i + 1];
+        const b = inputPixels[i + 2];
+
+        // Preserve original frame shading.
         const luminance =
           (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-        const shade = (0.22 + luminance * 0.78) * brightness;
+        const shade = Math.pow(
+          Math.max(0.02, luminance),
+          0.85
+        ) * brightness;
 
-        pixels[i] = Math.min(255, target[0] * shade);
-        pixels[i + 1] = Math.min(255, target[1] * shade);
-        pixels[i + 2] = Math.min(255, target[2] * shade);
+        outputPixels[i] = Math.min(255, target[0] * shade);
+        outputPixels[i + 1] = Math.min(255, target[1] * shade);
+        outputPixels[i + 2] = Math.min(255, target[2] * shade);
       }
 
-      context.putImageData(imageData, 0, 0);
+      ctx.putImageData(output, 0, 0);
 
-      const result = canvas.toDataURL("image/png");
+      callback(canvas.toDataURL("image/png"));
 
-      frameImageCache.set(key, result);
-      callback(result);
-
-    } catch (error) {
-      console.error("Frame coloring failed:", error);
+    })
+    .catch(error => {
+      console.error("Frame coloring error:", error);
       callback(source);
-    }
-  };
-
-  image.onerror = () => {
-    console.error("Could not load frame image:", source);
-    callback(source);
-  };
-
-  image.src = source;
+    });
 }
 
 /* =========================================
-   PART POSITIONING
+   PART POSITIONS
 ========================================= */
 
 function getLayerPosition(category, position) {
@@ -239,34 +292,42 @@ function getLayerPosition(category, position) {
       left: "42%", top: "7%",
       width: "58%", height: "78%"
     },
+
     frontWheel: {
       left: "70%", top: "53%",
       width: "27%", height: "27%"
     },
+
     rearWheel: {
       left: "4%", top: "52%",
       width: "27%", height: "27%"
     },
+
     rearTire: {
       left: "1%", top: "48%",
       width: "34%", height: "34%"
     },
+
     frontTire: {
       left: "66.5%", top: "49%",
       width: "34%", height: "34%"
     },
+
     motor: {
       left: "5.5%", top: "52.5%",
       width: "24%", height: "24%"
     },
+
     handlebars: {
       left: "53.5%", top: "13%",
       width: "24%", height: "24%"
     },
+
     fenders: {
       left: "57.5%", top: "22%",
       width: "29%", height: "29%"
     },
+
     lights: {
       left: "64%", top: "27%",
       width: "10%", height: "10%"
@@ -309,7 +370,8 @@ function createBikeCanvas(
     maxWidth: thumbnail ? "260px" : "700px",
     aspectRatio: "1 / 1",
     margin: "auto",
-    isolation: "isolate"
+    isolation: "isolate",
+    overflow: "hidden"
   });
 
   layers.forEach((layer, layerIndex) => {
@@ -328,7 +390,6 @@ function createBikeCanvas(
 
       const image = document.createElement("img");
 
-      image.src = source;
       image.alt = category;
       image.draggable = false;
 
@@ -343,28 +404,36 @@ function createBikeCanvas(
         pointerEvents: "none"
       });
 
+      canvas.appendChild(image);
+
       if (category === "frame") {
         image.style.opacity = "0";
 
-        colorizeFrameImage(
+        const renderVersion = canvas.dataset.renderVersion || "0";
+
+        colorizeFrame(
           source,
           colorsToShow,
           coloredSource => {
+            if (!image.isConnected) return;
+            if (canvas.dataset.renderVersion !== renderVersion) return;
+
             image.src = coloredSource;
             image.style.opacity = "1";
           }
         );
+      } else {
+        image.src = source;
       }
 
       image.onerror = () => {
         console.error("Image failed:", source);
       };
-
-      canvas.appendChild(image);
     });
   });
 
   parent.appendChild(canvas);
+
   return canvas;
 }
 
@@ -374,28 +443,33 @@ function createBikeCanvas(
 
 function updatePreview() {
   const preview = document.getElementById("bike-preview");
+
   if (!preview) return;
 
   preview.innerHTML = "";
 
   const title = document.createElement("h2");
   title.textContent = "SUPER73 ZX SE";
+
   preview.appendChild(title);
 
   const holder = document.createElement("div");
   holder.className = "preview-canvas-holder";
+
   preview.appendChild(holder);
 
   createBikeCanvas(
     holder,
     selectedParts,
-    selectedColors
+    { ...selectedColors }
   );
 }
 
 /* =========================================
    LIVE FRAME SLIDERS
 ========================================= */
+
+let sliderUpdatePending = false;
 
 function changeFrameAdjustment() {
   const hue = document.getElementById("frame-hue");
@@ -408,8 +482,20 @@ function changeFrameAdjustment() {
   selectedColors.saturation = Number(saturation.value);
   selectedColors.brightness = Number(brightness.value);
 
-  updatePreview();
+  // Update the preview during dragging.
+  if (sliderUpdatePending) return;
+
+  sliderUpdatePending = true;
+
+  requestAnimationFrame(() => {
+    sliderUpdatePending = false;
+    updatePreview();
+  });
 }
+
+/* =========================================
+   RESET FRAME ADJUSTMENTS
+========================================= */
 
 function resetFrameAdjustments() {
   selectedColors = {
@@ -430,7 +516,7 @@ function resetFrameAdjustments() {
 }
 
 /* =========================================
-   CATEGORY SELECTION
+   SELECT CATEGORY
 ========================================= */
 
 function selectCategory(category) {
@@ -458,14 +544,14 @@ function selectCategory(category) {
     option.className = "part-option";
 
     const image = document.createElement("img");
+
     image.src = imagePath(category, filename);
     image.alt = filename;
 
     const name = document.createElement("span");
     name.textContent = "Option " + (index + 1);
 
-    option.appendChild(image);
-    option.appendChild(name);
+    option.append(image, name);
 
     const current = selectedParts[category];
 
@@ -473,7 +559,9 @@ function selectCategory(category) {
       ? current.includes(filename)
       : current === filename;
 
-    if (isSelected) option.classList.add("selected");
+    if (isSelected) {
+      option.classList.add("selected");
+    }
 
     option.onclick = () => {
       selectPart(category, filename, index);
@@ -493,7 +581,9 @@ function selectPart(category, filename, index) {
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
-    if (!Array.isArray(current)) current = [current];
+    if (!Array.isArray(current)) {
+      current = [current];
+    }
 
     if (current.includes(filename)) {
       current = current.filter(item => item !== filename);
@@ -562,7 +652,11 @@ function getSavedBikes() {
 
 function storeSavedBikes(bikes) {
   try {
-    localStorage.setItem("savedBikes", JSON.stringify(bikes));
+    localStorage.setItem(
+      "savedBikes",
+      JSON.stringify(bikes)
+    );
+
     return true;
   } catch (error) {
     console.error("Could not save bikes:", error);
@@ -579,7 +673,9 @@ function saveBike() {
   const savedBikes = getSavedBikes();
 
   if (editingBikeId !== null) {
-    const bike = savedBikes.find(item => item.id === editingBikeId);
+    const bike = savedBikes.find(
+      item => item.id === editingBikeId
+    );
 
     if (bike) {
       bike.parts = JSON.parse(JSON.stringify(selectedParts));
@@ -596,6 +692,7 @@ function saveBike() {
   }
 
   const name = prompt("What do you want to name your bike?");
+
   if (!name || !name.trim()) return;
 
   const newBike = {
@@ -611,14 +708,19 @@ function saveBike() {
 
   editingBikeId = newBike.id;
 
-  updateEditingStatus();
   showSavedBikes();
+  updateEditingStatus();
 
   alert("Bike saved!");
 }
 
+/* =========================================
+   SAVE AS NEW
+========================================= */
+
 function saveBikeAsNew() {
   const name = prompt("Name your new bike:");
+
   if (!name || !name.trim()) return;
 
   const savedBikes = getSavedBikes();
@@ -636,8 +738,8 @@ function saveBikeAsNew() {
 
   editingBikeId = newBike.id;
 
-  updateEditingStatus();
   showSavedBikes();
+  updateEditingStatus();
 
   alert("New bike saved!");
 }
@@ -647,10 +749,15 @@ function saveBikeAsNew() {
 ========================================= */
 
 function loadBike(id) {
-  const bike = getSavedBikes().find(item => item.id === id);
+  const bike = getSavedBikes().find(
+    item => item.id === id
+  );
+
   if (!bike) return;
 
-  selectedParts = JSON.parse(JSON.stringify(bike.parts || {}));
+  selectedParts = JSON.parse(
+    JSON.stringify(bike.parts || {})
+  );
 
   selectedColors = {
     hue: bike.colors?.hue ?? 0,
@@ -664,10 +771,17 @@ function loadBike(id) {
   updatePreview();
   updateEditingStatus();
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 
   alert("Bike loaded! You can now edit it.");
 }
+
+/* =========================================
+   SLIDER DISPLAY
+========================================= */
 
 function resetSliderDisplay() {
   const hue = document.getElementById("frame-hue");
@@ -685,11 +799,18 @@ function resetSliderDisplay() {
 
 function renameBike(id) {
   const savedBikes = getSavedBikes();
-  const bike = savedBikes.find(item => item.id === id);
+
+  const bike = savedBikes.find(
+    item => item.id === id
+  );
 
   if (!bike) return;
 
-  const newName = prompt("Enter a new name:", bike.name);
+  const newName = prompt(
+    "Enter a new name:",
+    bike.name
+  );
+
   if (!newName || !newName.trim()) return;
 
   bike.name = newName.trim();
@@ -705,9 +826,13 @@ function renameBike(id) {
 ========================================= */
 
 function deleteBike(id) {
-  if (!confirm("Are you sure you want to delete this bike?")) return;
+  if (!confirm("Are you sure you want to delete this bike?")) {
+    return;
+  }
 
-  const savedBikes = getSavedBikes().filter(bike => bike.id !== id);
+  const savedBikes = getSavedBikes().filter(
+    bike => bike.id !== id
+  );
 
   if (!storeSavedBikes(savedBikes)) return;
 
@@ -725,6 +850,7 @@ function deleteBike(id) {
 
 function showSavedBikes() {
   const container = document.getElementById("saved-bikes");
+
   if (!container) return;
 
   container.innerHTML = "";
@@ -733,7 +859,10 @@ function showSavedBikes() {
 
   if (!savedBikes.length) {
     const empty = document.createElement("p");
-    empty.textContent = "Your garage is empty. Save a bike to get started.";
+
+    empty.textContent =
+      "Your garage is empty. Save a bike to get started.";
+
     container.appendChild(empty);
     return;
   }
@@ -751,7 +880,11 @@ function showSavedBikes() {
     createBikeCanvas(
       preview,
       bike.parts || {},
-      bike.colors || { hue: 0, saturation: 100, brightness: 100 },
+      bike.colors || {
+        hue: 0,
+        saturation: 100,
+        brightness: 100
+      },
       true
     );
 
@@ -759,20 +892,25 @@ function showSavedBikes() {
     buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
+    loadButton.type = "button";
     loadButton.textContent = "Load / Edit";
     loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
+    renameButton.type = "button";
     renameButton.textContent = "Rename";
     renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
     deleteButton.onclick = () => deleteBike(bike.id);
 
     buttons.append(loadButton, renameButton, deleteButton);
+
     card.append(title, preview, buttons);
+
     container.appendChild(card);
   });
 }
@@ -783,17 +921,22 @@ function showSavedBikes() {
 
 function updateEditingStatus() {
   const status = document.getElementById("editing-status");
+
   if (!status) return;
 
   if (editingBikeId === null) {
-    status.textContent = "Not currently editing a saved bike.";
+    status.textContent =
+      "Not currently editing a saved bike.";
     return;
   }
 
-  const bike = getSavedBikes().find(item => item.id === editingBikeId);
+  const bike = getSavedBikes().find(
+    item => item.id === editingBikeId
+  );
 
   status.textContent = bike
-    ? "Editing: " + bike.name + " — Save Bike updates this build."
+    ? "Editing: " + bike.name +
+      " — Save Bike updates this build."
     : "Not currently editing a saved bike.";
 }
 
@@ -802,14 +945,22 @@ function updateEditingStatus() {
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  ["frame-hue", "frame-saturation", "frame-brightness"]
-    .forEach(id => {
-      const slider = document.getElementById(id);
+  const sliderIds = [
+    "frame-hue",
+    "frame-saturation",
+    "frame-brightness"
+  ];
 
-      if (slider) {
-        slider.addEventListener("input", changeFrameAdjustment);
-      }
-    });
+  sliderIds.forEach(id => {
+    const slider = document.getElementById(id);
+
+    if (slider) {
+      slider.addEventListener(
+        "input",
+        changeFrameAdjustment
+      );
+    }
+  });
 
   updatePreview();
   showSavedBikes();
