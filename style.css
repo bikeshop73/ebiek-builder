@@ -1,6 +1,5 @@
-/* =====================================
-   GENERAL
-===================================== */
+
+/* GENERAL */
 
 * {
   margin: 0;
@@ -15,9 +14,7 @@ body {
 }
 
 
-/* =====================================
-   HEADER
-===================================== */
+/* HEADER */
 
 header {
   background: #191919;
@@ -39,9 +36,7 @@ header p {
 }
 
 
-/* =====================================
-   PAGE LAYOUT
-===================================== */
+/* LAYOUT */
 
 main {
   max-width: 1100px;
@@ -50,9 +45,7 @@ main {
 }
 
 
-/* =====================================
-   BUTTONS
-===================================== */
+/* BUTTONS */
 
 button {
   background: #252525;
@@ -61,7 +54,7 @@ button {
   padding: 13px 20px;
   border-radius: 7px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: 0.2s;
 }
 
 button:hover {
@@ -70,9 +63,7 @@ button:hover {
 }
 
 
-/* =====================================
-   BIKE PREVIEW
-===================================== */
+/* PREVIEW */
 
 .preview {
   background: #1c1c1c;
@@ -104,6 +95,7 @@ button:hover {
 }
 
 .bike-canvas {
+  position: relative;
   overflow: hidden;
 }
 
@@ -117,9 +109,7 @@ button:hover {
 }
 
 
-/* =====================================
-   SAVE CONTROLS
-===================================== */
+/* SAVE CONTROLS */
 
 #save-controls {
   display: flex;
@@ -137,9 +127,7 @@ button:hover {
 }
 
 
-/* =====================================
-   CUSTOM COLORS
-===================================== */
+/* CUSTOM COLORS */
 
 .custom-colors {
   background: #1c1c1c;
@@ -190,9 +178,7 @@ button:hover {
 }
 
 
-/* =====================================
-   CUSTOMIZER
-===================================== */
+/* CUSTOMIZER */
 
 .customizer {
   margin-top: 30px;
@@ -253,9 +239,7 @@ button:hover {
 }
 
 
-/* =====================================
-   MY GARAGE
-===================================== */
+/* MY GARAGE */
 
 .garage {
   background: #1c1c1c;
@@ -340,9 +324,7 @@ button:hover {
 }
 
 
-/* =====================================
-   MOBILE
-===================================== */
+/* MOBILE */
 
 @media (max-width: 600px) {
 
