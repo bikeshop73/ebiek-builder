@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta name="theme-color" content="#111111">
+
   <title>SUPER73 ZX SE Builder</title>
 
   <link rel="stylesheet" href="style.css">
@@ -22,7 +22,6 @@
 
 <main>
 
-  <!-- BIKE PREVIEW -->
   <section class="preview">
     <div class="preview-label">YOUR BUILD</div>
 
@@ -32,81 +31,36 @@
     </div>
 
     <div id="save-controls">
-      <button onclick="saveBike()">Save Bike</button>
-      <button onclick="saveBikeAsNew()">Save As New</button>
+      <button type="button" onclick="saveBike()">Save Bike</button>
+      <button type="button" onclick="saveBikeAsNew()">Save As New</button>
     </div>
 
-    <p id="editing-status"></p>
+    <p id="editing-status">Not currently editing a saved bike.</p>
   </section>
 
-
-  <!-- CUSTOM COLORS -->
-  <section class="custom-colors">
-
-    <h2>Custom Colors</h2>
-    <p>Change the colors of your bike.</p>
-
-    <div class="color-controls">
-
-      <div class="color-control">
-        <label for="frame-color">Frame Color</label>
-        <input
-          type="color"
-          id="frame-color"
-          value="#000000"
-          onchange="changeColor('frame', this.value)"
-        >
-      </div>
-
-      <div class="color-control">
-        <label for="accent-color">Wheel Color</label>
-        <input
-          type="color"
-          id="accent-color"
-          value="#000000"
-          onchange="changeColor('accent', this.value)"
-        >
-      </div>
-
-    </div>
-
-    <button class="reset-colors" onclick="resetColors()">
-      Reset Colors
-    </button>
-
-  </section>
-
-
-  <!-- CUSTOMIZER -->
   <section class="customizer">
-
     <h2>Customize Your Bike</h2>
 
     <div class="categories">
-
-      <button onclick="selectCategory('frame')">Frame</button>
-      <button onclick="selectCategory('frontForks')">Front Forks</button>
-      <button onclick="selectCategory('frontWheel')">Front Wheel</button>
-      <button onclick="selectCategory('rearWheel')">Rear Wheel</button>
-      <button onclick="selectCategory('tires')">Tires</button>
-      <button onclick="selectCategory('motor')">Motor</button>
-      <button onclick="selectCategory('handlebars')">Handlebars</button>
-      <button onclick="selectCategory('seat')">Seat</button>
-      <button onclick="selectCategory('battery')">Battery</button>
-      <button onclick="selectCategory('fenders')">Fenders + Plates</button>
-      <button onclick="selectCategory('lights')">Lights</button>
-      <button onclick="selectCategory('accessories')">Accessories</button>
-
+      <button type="button" onclick="selectCategory('frame')">Frame</button>
+      <button type="button" onclick="selectCategory('frontForks')">Front Forks</button>
+      <button type="button" onclick="selectCategory('frontWheel')">Front Wheel</button>
+      <button type="button" onclick="selectCategory('rearWheel')">Rear Wheel</button>
+      <button type="button" onclick="selectCategory('tires')">Tires</button>
+      <button type="button" onclick="selectCategory('motor')">Motor</button>
+      <button type="button" onclick="selectCategory('handlebars')">Handlebars</button>
+      <button type="button" onclick="selectCategory('seat')">Seat</button>
+      <button type="button" onclick="selectCategory('battery')">Battery</button>
+      <button type="button" onclick="selectCategory('fenders')">Fenders + Plates</button>
+      <button type="button" onclick="selectCategory('lights')">Lights</button>
+      <button type="button" onclick="selectCategory('accessories')">Accessories</button>
     </div>
 
     <div id="parts-list">
       Select a category to customize.
     </div>
-
   </section>
 
-
-  <!-- MY GARAGE -->
   <section class="garage">
 
     <div class="garage-heading">
@@ -115,7 +69,9 @@
         <p>Your saved custom bikes.</p>
       </div>
 
-      <button onclick="showSavedBikes()">Refresh Garage</button>
+      <button type="button" onclick="showSavedBikes()">
+        Refresh Garage
+      </button>
     </div>
 
     <div id="saved-bikes">
