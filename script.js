@@ -207,22 +207,19 @@ function getLayerPosition(category, position) {
 // This avoids the old color-blending problem.
 // =====================================
 
-function addColorOverlay(canvas, source, position, color, zIndex) {
 
+function addColorOverlay(canvas, source, position, color, zIndex) {
   const overlay = document.createElement("div");
 
   overlay.className = "color-overlay";
 
-  Object.assign(overlay.style, {
-    position: "absolute",
-    left: position.left,
-    top: position.top,
-    width: position.width,
-    height: position.height,
-    backgroundColor: color,
-    zIndex: String(zIndex),
-    pointerEvents: "none"
-  });
+  overlay.style.position = "absolute";
+  overlay.style.left = position.left;
+  overlay.style.top = position.top;
+  overlay.style.width = position.width;
+  overlay.style.height = position.height;
+
+  overlay.style.backgroundColor = color;
 
   overlay.style.maskImage = `url("${source}")`;
   overlay.style.webkitMaskImage = `url("${source}")`;
@@ -236,8 +233,11 @@ function addColorOverlay(canvas, source, position, color, zIndex) {
   overlay.style.maskRepeat = "no-repeat";
   overlay.style.webkitMaskRepeat = "no-repeat";
 
-  overlay.style.maskMode = "alpha";
-  overlay.style.mixBlendMode = "normal";
+  // Color Burn blending
+  overlay.style.mixBlendMode = "color-burn";
+  overlay.style.opacity = "0.85";
+
+  overlay.style.zIndex = String(zIndex);
 
   canvas.appendChild(overlay);
 }
