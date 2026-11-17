@@ -1,6 +1,10 @@
-
 // =====================================
 // SUPER73 ZX SE BIKE BUILDER
+// =====================================
+
+
+// =====================================
+// PART IMAGES
 // =====================================
 
 const parts = {
@@ -34,7 +38,10 @@ const parts = {
     "IMG_5986.PNG"
   ],
 
-  motor: ["IMG_5959.PNG", "IMG_5993.PNG"],
+  motor: [
+    "IMG_5959.PNG",
+    "IMG_5993.PNG"
+  ],
 
   handlebars: [
     "IMG_5980.PNG", "IMG_5981.PNG",
@@ -66,7 +73,9 @@ const parts = {
     "IMG_5991.PNG"
   ],
 
-  lights: ["IMG_5992.PNG"],
+  lights: [
+    "IMG_5992.PNG"
+  ],
 
   accessories: [
     "IMG_6030.PNG",
@@ -77,10 +86,10 @@ const parts = {
   ]
 };
 
+
 // =====================================
 // IMAGE FOLDERS
 // =====================================
-
 
 const folders = {
   frame: "Frames",
@@ -99,10 +108,53 @@ const folders = {
 
 
 // =====================================
-// SELECTED PARTS
+// CURRENT BUILD
 // =====================================
 
-const selectedParts = {};
+let selectedParts = {};
+
+let selectedColors = {
+  frame: "#202020",
+  accent: "#d71920"
+};
+
+let editingBikeId = null;
+
+
+// =====================================
+// ACCESSORY COMBINATIONS
+// =====================================
+
+const allowedAccessoryPairs = [
+  [0, 1],
+  [0, 3],
+  [1, 2],
+  [1, 4],
+  [3, 4],
+  [2, 3]
+];
+
+
+// =====================================
+// PREVIEW LAYER ORDER
+// =====================================
+
+const layers = [
+  { category: "tires", position: "rear" },
+  { category: "tires", position: "front" },
+  { category: "rearWheel" },
+  { category: "frontWheel" },
+  { category: "motor" },
+  { category: "frontForks" },
+  { category: "fenders" },
+  { category: "lights" },
+  { category: "handlebars" },
+  { category: "seat" },
+  { category: "frame" },
+  { category: "battery" },
+  { category: "accessories" }
+];
+
 
 // =====================================
 // IMAGE PATH
@@ -115,152 +167,237 @@ function imagePath(category, filename) {
   ).href;
 }
 
-// =====================================
-// ACCESSORY COMBINATIONS
-// =====================================
-
-const allowedAccessoryPairs = [
-  [0, 1], // 1 + 2
-  [0, 3], // 1 + 4
-  [1, 2], // 2 + 3
-  [1, 4], // 2 + 5
-  [3, 4], // 4 + 5
-  [2, 3]  // 3 + 4
-];
 
 // =====================================
-// SHOW CATEGORY OPTIONS
+// PART POSITIONING
 // =====================================
 
-function selectCategory(category) {
-  const list = document.getElementById("parts-list");
+function getLayerPosition(category, position) {
 
-  if (!list || !parts[category]) return;
-
-  list.innerHTML = "";
-
-  const heading = document.createElement("h3");
-
-  heading.textContent = category
-    .replace(/([A-Z])/g, " $1")
-    .toUpperCase();
-
-  list.appendChild(heading);
-
-  parts[category].forEach(part => {
-    const button = document.createElement("button");
-
-    button.className = "part-option";
-
-    // IMAGE THUMBNAIL
-    if (folders[category]) {
-      const img = document.createElement("img");
-
-      img.src = imagePath(category, part);
-      img.alt = part;
-
-      img.onerror = () => {
-        console.error("Thumbnail failed:", img.src);
-      };
-
-      button.appendChild(img);
-    }
-
-    // PART LABEL
-    const label = document.createElement("span");
-
-    label.textContent = part.replace(/\.[^.]+$/, "");
-
-    button.appendChild(label);
-
-    // SELECTED HIGHLIGHT
-    const multiSelected = ["battery", "accessories"];
-
-    const isSelected = multiSelected.includes(category)
-      ? (selectedParts[category] || []).includes(part)
-      : selectedParts[category] === part;
-
-    if (isSelected) {
-      button.classList.add("selected");
-    }
-
-    // =====================================
-    // BUTTON CLICK
-    // =====================================
-
-    button.onclick = () => {
-
-      // BATTERIES: ONLY ADJACENT PAIRS
-      if (category === "battery") {
-        const current = selectedParts.battery || [];
-
-        if (current.includes(part)) {
-
-          selectedParts.battery =
-            current.filter(p => p !== part);
-
-        } else if (current.length < 2) {
-
-          const indexes = [...current, part]
-            .map(p => parts.battery.indexOf(p));
-
-          if (
-            indexes.length === 1 ||
-            Math.abs(indexes[0] - indexes[1]) === 1
-          ) {
-            selectedParts.battery = [...current, part];
-          }
-        }
-      }
-
-      // ACCESSORIES: ONLY SIX APPROVED PAIRS
-      else if (category === "accessories") {
-        const current = selectedParts.accessories || [];
-
-        const currentIndex = parts.accessories.indexOf(part);
-
-        if (current.includes(part)) {
-
-          selectedParts.accessories =
-            current.filter(p => p !== part);
-
-        } else if (current.length === 0) {
-
-          selectedParts.accessories = [part];
-
-        } else if (current.length === 1) {
-
-          const firstIndex = parts.accessories.indexOf(current[0]);
-
-          const valid = allowedAccessoryPairs.some(pair =>
-            pair.includes(firstIndex) &&
-            pair.includes(currentIndex)
-          );
-
-          if (valid) {
-            selectedParts.accessories = [...current, part];
-          }
-        }
-      }
-
-      // ALL OTHER PARTS: SINGLE SELECTION
-      else {
-        selectedParts[category] = part;
-      }
-
-      updatePreview();
-      selectCategory(category);
+  if (category === "frontForks") {
+    return {
+      left: "42%",
+      top: "7%",
+      width: "58%",
+      height: "78%"
     };
+  }
 
-    list.appendChild(button);
-  });
+  if (category === "frontWheel") {
+    return {
+      left: "70%",
+      top: "53%",
+      width: "27%",
+      height: "27%"
+    };
+  }
+
+  if (category === "rearWheel") {
+    return {
+      left: "4%",
+      top: "52%",
+      width: "27%",
+      height: "27%"
+    };
+  }
+
+  if (category === "tires" && position === "rear") {
+    return {
+      left: "1%",
+      top: "48%",
+      width: "34%",
+      height: "34%"
+    };
+  }
+
+  if (category === "tires" && position === "front") {
+    return {
+      left: "66.5%",
+      top: "49%",
+      width: "34%",
+      height: "34%"
+    };
+  }
+
+  if (category === "motor") {
+    return {
+      left: "5.5%",
+      top: "52.5%",
+      width: "24%",
+      height: "24%"
+    };
+  }
+
+  if (category === "handlebars") {
+    return {
+      left: "53.5%",
+      top: "13%",
+      width: "24%",
+      height: "24%"
+    };
+  }
+
+  if (category === "fenders") {
+    return {
+      left: "57.5%",
+      top: "22%",
+      width: "29%",
+      height: "29%"
+    };
+  }
+
+  if (category === "lights") {
+    return {
+      left: "64%",
+      top: "27%",
+      width: "10%",
+      height: "10%"
+    };
+  }
+
+  return {
+    left: "0%",
+    top: "0%",
+    width: "100%",
+    height: "100%"
+  };
 }
 
+
 // =====================================
-// UPDATE BIKE PREVIEW
+// CREATE BIKE PREVIEW CANVAS
+// =====================================
+
+function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) {
+
+  const canvas = document.createElement("div");
+
+  canvas.className = thumbnail
+    ? "bike-canvas bike-thumbnail"
+    : "bike-canvas";
+
+  canvas.style.position = "relative";
+  canvas.style.width = "100%";
+  canvas.style.maxWidth = thumbnail ? "260px" : "700px";
+  canvas.style.aspectRatio = "1 / 1";
+  canvas.style.margin = "auto";
+
+  layers.forEach(layer => {
+
+    const category = layer.category;
+    const selected = partsToShow[category];
+
+    if (!selected) return;
+
+    let filenames = [];
+
+    if (Array.isArray(selected)) {
+      filenames = selected;
+    } else {
+      filenames = [selected];
+    }
+
+    filenames.forEach(filename => {
+
+      const source = imagePath(category, filename);
+
+      const position = getLayerPosition(
+        category,
+        layer.position
+      );
+
+      const image = document.createElement("img");
+
+      image.src = source;
+      image.alt = category;
+      image.draggable = false;
+
+      image.style.position = "absolute";
+      image.style.left = position.left;
+      image.style.top = position.top;
+      image.style.width = position.width;
+      image.style.height = position.height;
+      image.style.objectFit = "contain";
+      image.style.zIndex = String(layers.indexOf(layer) + 1);
+
+      canvas.appendChild(image);
+
+      // Frame color overlay
+      if (category === "frame" && colorsToShow.frame) {
+        addColorOverlay(
+          canvas,
+          source,
+          position,
+          colorsToShow.frame,
+          layers.indexOf(layer) + 1.5
+        );
+      }
+
+      // Accent color applies to wheel layers only
+      if (
+        (category === "frontWheel" || category === "rearWheel") &&
+        colorsToShow.accent
+      ) {
+        addColorOverlay(
+          canvas,
+          source,
+          position,
+          colorsToShow.accent,
+          layers.indexOf(layer) + 1.5
+        );
+      }
+
+    });
+  });
+
+  parent.appendChild(canvas);
+
+  return canvas;
+}
+
+
+// =====================================
+// COLOR OVERLAY
+// =====================================
+
+function addColorOverlay(canvas, source, position, color, zIndex) {
+
+  const overlay = document.createElement("div");
+
+  overlay.className = "color-overlay";
+
+  overlay.style.position = "absolute";
+  overlay.style.left = position.left;
+  overlay.style.top = position.top;
+  overlay.style.width = position.width;
+  overlay.style.height = position.height;
+  overlay.style.backgroundColor = color;
+
+  overlay.style.maskImage = `url("${source}")`;
+  overlay.style.webkitMaskImage = `url("${source}")`;
+
+  overlay.style.maskSize = "contain";
+  overlay.style.webkitMaskSize = "contain";
+
+  overlay.style.maskPosition = "center";
+  overlay.style.webkitMaskPosition = "center";
+
+  overlay.style.maskRepeat = "no-repeat";
+  overlay.style.webkitMaskRepeat = "no-repeat";
+
+  overlay.style.mixBlendMode = "color";
+  overlay.style.zIndex = String(zIndex);
+
+  canvas.appendChild(overlay);
+}
+
+
+// =====================================
+// UPDATE MAIN PREVIEW
 // =====================================
 
 function updatePreview() {
+
   const preview = document.getElementById("bike-preview");
 
   if (!preview) return;
@@ -273,218 +410,598 @@ function updatePreview() {
 
   preview.appendChild(title);
 
-  const canvas = document.createElement("div");
+  const canvasHolder = document.createElement("div");
 
-  canvas.style.position = "relative";
-  canvas.style.width = "100%";
-  canvas.style.maxWidth = "700px";
-  canvas.style.aspectRatio = "1 / 1";
-  canvas.style.margin = "auto";
+  canvasHolder.className = "preview-canvas-holder";
 
-  preview.appendChild(canvas);
+  preview.appendChild(canvasHolder);
 
-  // =====================================
-  // LAYER ORDER
-  // =====================================
-
-  const layers = [
-    { category: "tires", position: "rear" },
-    { category: "tires", position: "front" },
-    { category: "rearWheel" },
-    { category: "frontWheel" },
-    { category: "motor" },
-    { category: "frontForks" },
-    { category: "fenders" },
-    { category: "lights" },
-    { category: "handlebars" },
-    { category: "seat" },
-    { category: "frame" },
-    { category: "battery" },
-    { category: "accessories" }
-  ];
-
-  // =====================================
-  // DRAW EACH LAYER
-  // =====================================
-
-  layers.forEach(layer => {
-
-    const category = layer.category;
-
-    const multiple = ["battery", "accessories"];
-
-    const selected = multiple.includes(category)
-      ? (selectedParts[category] || [])
-      : [selectedParts[category]];
-
-    selected.forEach(part => {
-
-      if (!part) return;
-
-      const img = document.createElement("img");
-
-      img.src = imagePath(category, part);
-      img.alt = part;
-
-      img.onerror = () => {
-        console.error("Preview image failed:", img.src);
-      };
-
-      img.style.position = "absolute";
-      img.style.objectFit = "contain";
-
-      // =====================================
-      // POSITIONING
-      // =====================================
-
-      if (category === "frontForks") {
-        img.style.left = "42%";
-        img.style.top = "7%";
-        img.style.width = "58%";
-        img.style.height = "78%";
-
-      } else if (category === "frontWheel") {
-        img.style.left = "70%";
-        img.style.top = "53%";
-        img.style.width = "27%";
-        img.style.height = "27%";
-
-      } else if (category === "rearWheel") {
-        img.style.left = "4%";
-        img.style.top = "52%";
-        img.style.width = "27%";
-        img.style.height = "27%";
-
-      } else if (category === "tires" && layer.position === "rear") {
-        img.style.left = "1%";
-        img.style.top = "48%";
-        img.style.width = "34%";
-        img.style.height = "34%";
-
-      } else if (category === "tires" && layer.position === "front") {
-        img.style.left = "66.5%";
-        img.style.top = "49%";
-        img.style.width = "34%";
-        img.style.height = "34%";
-
-      } else if (category === "motor") {
-        img.style.left = "5.5%";
-        img.style.top = "52.5%";
-        img.style.width = "24%";
-        img.style.height = "24%";
-
-      } else if (category === "handlebars") {
-        img.style.left = "53.5%";
-        img.style.top = "13%";
-        img.style.width = "24%";
-        img.style.height = "24%";
-
-      } else if (category === "fenders") {
-        img.style.left = "57.5%";
-        img.style.top = "22%";
-        img.style.width = "29%";
-        img.style.height = "29%";
-
-      } else if (category === "lights") {
-        img.style.left = "64%";
-        img.style.top = "27%";
-        img.style.width = "10%";
-        img.style.height = "10%";
-
-      } else {
-        // SEAT, BATTERY AND ACCESSORIES
-        img.style.left = "0%";
-        img.style.top = "0%";
-        img.style.width = "100%";
-        img.style.height = "100%";
-      }
-
-      canvas.appendChild(img);
-    });
-  });
+  createBikeCanvas(
+    canvasHolder,
+    selectedParts,
+    selectedColors
+  );
 }
 
+
 // =====================================
-// INITIALIZE APP
+// CHANGE COLORS
 // =====================================
 
-document.addEventListener("DOMContentLoaded", () => {
+function changeColor(type, color) {
+
+  selectedColors[type] = color;
+
   updatePreview();
-});
+}
+
 
 // =====================================
-// SAVE AND LOAD BIKES
+// RESET COLORS
+// =====================================
+
+function resetColors() {
+
+  selectedColors.frame = "#202020";
+  selectedColors.accent = "#d71920";
+
+  document.getElementById("frame-color").value =
+    selectedColors.frame;
+
+  document.getElementById("accent-color").value =
+    selectedColors.accent;
+
+  updatePreview();
+}
+
+
+// =====================================
+// UPDATE COLOR INPUTS
+// =====================================
+
+function updateColorInputs() {
+
+  document.getElementById("frame-color").value =
+    selectedColors.frame || "#202020";
+
+  document.getElementById("accent-color").value =
+    selectedColors.accent || "#d71920";
+}
+
+
+// =====================================
+// SELECT A CATEGORY
+// =====================================
+
+function selectCategory(category) {
+
+  const container = document.getElementById("parts-list");
+
+  if (!parts[category]) return;
+
+  container.innerHTML = "";
+
+  const heading = document.createElement("h3");
+
+  heading.textContent =
+    category === "fenders"
+      ? "Fenders + Plates"
+      : category.replace(/([A-Z])/g, " $1");
+
+  container.appendChild(heading);
+
+  const options = document.createElement("div");
+
+  options.className = "part-options";
+
+  parts[category].forEach((filename, index) => {
+
+    const option = document.createElement("button");
+
+    option.className = "part-option";
+
+    const image = document.createElement("img");
+
+    image.src = imagePath(category, filename);
+    image.alt = filename;
+
+    const name = document.createElement("span");
+
+    name.textContent = "Option " + (index + 1);
+
+    option.appendChild(image);
+    option.appendChild(name);
+
+    const current = selectedParts[category];
+
+    const isSelected = Array.isArray(current)
+      ? current.includes(filename)
+      : current === filename;
+
+    if (isSelected) {
+      option.classList.add("selected");
+    }
+
+    option.onclick = () => {
+      selectPart(category, filename, index);
+    };
+
+    options.appendChild(option);
+
+  });
+
+  container.appendChild(options);
+}
+
+
+// =====================================
+// SELECT A PART
+// =====================================
+
+function selectPart(category, filename, index) {
+
+  // BATTERY RULE:
+  // Maximum two batteries.
+  // If two are selected, they must be adjacent options.
+
+  if (category === "battery") {
+
+    let current = selectedParts.battery || [];
+
+    if (!Array.isArray(current)) {
+      current = [current];
+    }
+
+    const alreadySelected = current.includes(filename);
+
+    if (alreadySelected) {
+
+      current = current.filter(item => item !== filename);
+
+    } else {
+
+      if (current.length >= 2) {
+        alert("You can only select two batteries.");
+        return;
+      }
+
+      if (current.length === 1) {
+
+        const currentIndex = parts.battery.indexOf(current[0]);
+
+        if (Math.abs(currentIndex - index) !== 1) {
+          alert("Choose two batteries next to each other.");
+          return;
+        }
+      }
+
+      current.push(filename);
+    }
+
+    if (current.length === 0) {
+      delete selectedParts.battery;
+    } else {
+      selectedParts.battery = current;
+    }
+  }
+
+  // ACCESSORY RULE:
+  // Maximum two accessories.
+  // Two accessories must be one of the allowed pairs.
+
+  else if (category === "accessories") {
+
+    let current = selectedParts.accessories || [];
+
+    if (!Array.isArray(current)) {
+      current = [current];
+    }
+
+    const alreadySelected = current.includes(filename);
+
+    if (alreadySelected) {
+
+      current = current.filter(item => item !== filename);
+
+    } else {
+
+      if (current.length >= 2) {
+        alert("You can only select two accessories.");
+        return;
+      }
+
+      if (current.length === 1) {
+
+        const firstIndex = parts.accessories.indexOf(current[0]);
+
+        const allowed = allowedAccessoryPairs.some(pair => {
+
+          return (
+            pair.includes(firstIndex) &&
+            pair.includes(index)
+          );
+
+        });
+
+        if (!allowed) {
+          alert("Those two accessories cannot be combined.");
+          return;
+        }
+      }
+
+      current.push(filename);
+    }
+
+    if (current.length === 0) {
+      delete selectedParts.accessories;
+    } else {
+      selectedParts.accessories = current;
+    }
+  }
+
+  // ALL OTHER PARTS:
+  // One selection per category.
+
+  else {
+
+    if (selectedParts[category] === filename) {
+      delete selectedParts[category];
+    } else {
+      selectedParts[category] = filename;
+    }
+  }
+
+  updatePreview();
+
+  selectCategory(category);
+}
+
+
+// =====================================
+// SAVED BIKES STORAGE
 // =====================================
 
 function getSavedBikes() {
-  return JSON.parse(localStorage.getItem("savedBikes") || "[]");
+
+  try {
+    return JSON.parse(
+      localStorage.getItem("savedBikes") || "[]"
+    );
+  } catch (error) {
+    console.error("Could not read saved bikes:", error);
+    return [];
+  }
 }
 
+
+function storeSavedBikes(bikes) {
+
+  localStorage.setItem(
+    "savedBikes",
+    JSON.stringify(bikes)
+  );
+}
+
+
+// =====================================
+// SAVE BIKE
+// =====================================
+
 function saveBike() {
+
+  const savedBikes = getSavedBikes();
+
+  // If a saved bike is currently being edited,
+  // update that saved bike instead of creating a duplicate.
+
+  if (editingBikeId !== null) {
+
+    const bike = savedBikes.find(
+      item => item.id === editingBikeId
+    );
+
+    if (bike) {
+
+      bike.parts = JSON.parse(
+        JSON.stringify(selectedParts)
+      );
+
+      bike.colors = JSON.parse(
+        JSON.stringify(selectedColors)
+      );
+
+      storeSavedBikes(savedBikes);
+
+      alert("Your changes have been saved!");
+
+      showSavedBikes();
+
+      return;
+    }
+  }
+
   const name = prompt("What do you want to name your bike?");
+
+  if (!name || !name.trim()) return;
+
+  const newBike = {
+    id: Date.now(),
+    name: name.trim(),
+    parts: JSON.parse(JSON.stringify(selectedParts)),
+    colors: JSON.parse(JSON.stringify(selectedColors))
+  };
+
+  savedBikes.push(newBike);
+
+  storeSavedBikes(savedBikes);
+
+  editingBikeId = newBike.id;
+
+  updateEditingStatus();
+
+  alert("Bike saved!");
+
+  showSavedBikes();
+}
+
+
+// =====================================
+// SAVE AS NEW BIKE
+// =====================================
+
+function saveBikeAsNew() {
+
+  const name = prompt("Name your new bike:");
 
   if (!name || !name.trim()) return;
 
   const savedBikes = getSavedBikes();
 
-  savedBikes.push({
+  const newBike = {
     id: Date.now(),
     name: name.trim(),
-    parts: JSON.parse(JSON.stringify(selectedParts))
-  });
+    parts: JSON.parse(JSON.stringify(selectedParts)),
+    colors: JSON.parse(JSON.stringify(selectedColors))
+  };
 
-  localStorage.setItem("savedBikes", JSON.stringify(savedBikes));
+  savedBikes.push(newBike);
 
-  alert("Bike saved!");
+  storeSavedBikes(savedBikes);
+
+  editingBikeId = newBike.id;
+
+  updateEditingStatus();
+
+  alert("New bike saved!");
+
+  showSavedBikes();
 }
 
+
+// =====================================
+// LOAD BIKE
+// =====================================
+
+function loadBike(id) {
+
+  const savedBikes = getSavedBikes();
+
+  const bike = savedBikes.find(
+    item => item.id === id
+  );
+
+  if (!bike) return;
+
+  selectedParts = JSON.parse(
+    JSON.stringify(bike.parts || {})
+  );
+
+  selectedColors = JSON.parse(
+    JSON.stringify(
+      bike.colors || {
+        frame: "#202020",
+        accent: "#d71920"
+      }
+    )
+  );
+
+  editingBikeId = bike.id;
+
+  updateColorInputs();
+  updatePreview();
+  updateEditingStatus();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+  alert("Bike loaded! You can now edit it.");
+}
+
+
+// =====================================
+// RENAME BIKE
+// =====================================
+
+function renameBike(id) {
+
+  const savedBikes = getSavedBikes();
+
+  const bike = savedBikes.find(
+    item => item.id === id
+  );
+
+  if (!bike) return;
+
+  const newName = prompt(
+    "Enter a new name:",
+    bike.name
+  );
+
+  if (!newName || !newName.trim()) return;
+
+  bike.name = newName.trim();
+
+  storeSavedBikes(savedBikes);
+
+  showSavedBikes();
+}
+
+
+// =====================================
+// DELETE BIKE
+// =====================================
+
+function deleteBike(id) {
+
+  const confirmed = confirm(
+    "Are you sure you want to delete this bike?"
+  );
+
+  if (!confirmed) return;
+
+  const savedBikes = getSavedBikes().filter(
+    bike => bike.id !== id
+  );
+
+  storeSavedBikes(savedBikes);
+
+  if (editingBikeId === id) {
+    editingBikeId = null;
+    updateEditingStatus();
+  }
+
+  showSavedBikes();
+}
+
+
+// =====================================
+// SHOW MY GARAGE
+// =====================================
+
 function showSavedBikes() {
+
   const container = document.getElementById("saved-bikes");
 
   if (!container) return;
 
-  container.innerHTML = "<h2>My Saved Bikes</h2>";
+  container.innerHTML = "";
 
   const savedBikes = getSavedBikes();
 
   if (savedBikes.length === 0) {
-    container.innerHTML += "<p>No saved bikes yet!</p>";
+
+    const empty = document.createElement("p");
+
+    empty.textContent = "Your garage is empty. Save a bike to get started.";
+
+    container.appendChild(empty);
+
     return;
   }
 
   savedBikes.forEach(bike => {
-    const item = document.createElement("div");
 
-    const name = document.createElement("h3");
-    name.textContent = bike.name;
+    const card = document.createElement("div");
+
+    card.className = "garage-card";
+
+    const title = document.createElement("h3");
+
+    title.textContent = bike.name;
+
+    const preview = document.createElement("div");
+
+    preview.className = "garage-bike-preview";
+
+    createBikeCanvas(
+      preview,
+      bike.parts || {},
+      bike.colors || {
+        frame: "#202020",
+        accent: "#d71920"
+      },
+      true
+    );
+
+    const buttons = document.createElement("div");
+
+    buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
-    loadButton.textContent = "Load";
 
-    loadButton.onclick = () => {
-      Object.keys(selectedParts).forEach(key => delete selectedParts[key]);
+    loadButton.textContent = "Load / Edit";
 
-      Object.assign(selectedParts, JSON.parse(JSON.stringify(bike.parts)));
+    loadButton.onclick = () => loadBike(bike.id);
 
-      updatePreview();
-      alert("Bike loaded!");
-    };
+    const renameButton = document.createElement("button");
+
+    renameButton.textContent = "Rename";
+
+    renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
+
     deleteButton.textContent = "Delete";
 
-    deleteButton.onclick = () => {
-      const updated = getSavedBikes().filter(b => b.id !== bike.id);
+    deleteButton.className = "delete-button";
 
-      localStorage.setItem("savedBikes", JSON.stringify(updated));
+    deleteButton.onclick = () => deleteBike(bike.id);
 
-      showSavedBikes();
-    };
+    buttons.appendChild(loadButton);
+    buttons.appendChild(renameButton);
+    buttons.appendChild(deleteButton);
 
-    item.appendChild(name);
-    item.appendChild(loadButton);
-    item.appendChild(deleteButton);
+    card.appendChild(title);
+    card.appendChild(preview);
+    card.appendChild(buttons);
 
-    container.appendChild(item);
+    container.appendChild(card);
+
   });
 }
+
+
+// =====================================
+// EDITING STATUS
+// =====================================
+
+function updateEditingStatus() {
+
+  const status = document.getElementById("editing-status");
+
+  if (!status) return;
+
+  if (editingBikeId === null) {
+
+    status.textContent = "Not currently editing a saved bike.";
+
+    return;
+  }
+
+  const bike = getSavedBikes().find(
+    item => item.id === editingBikeId
+  );
+
+  status.textContent = bike
+    ? "Editing: " + bike.name + " — Save Bike updates this build."
+    : "Not currently editing a saved bike.";
+}
+
+
+// =====================================
+// INITIALIZE BUILDER
+// =====================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  updateColorInputs();
+
+  updatePreview();
+
+  showSavedBikes();
+
+  updateEditingStatus();
+
+});
