@@ -112,6 +112,24 @@ let selectedColors = {
   frameBrightness: 50
 };
 
+// FRAME HUE, SATURATION & BRIGHTNESS
+
+let frameAdjustment = {
+  hue: 0,
+  saturation: 100,
+  brightness: 100
+};
+
+function changeFrameAdjustment(type, value) {
+  if (!["hue", "saturation", "brightness"].includes(type)) {
+    return;
+  }
+
+  frameAdjustment[type] = Number(value);
+
+  updatePreview();
+}
+
 let editingBikeId = null;
 
 // =========================================
@@ -307,6 +325,13 @@ function createBikeCanvas(
 
       const image = document.createElement("img");
 
+       if (category === "frame") {
+  image.style.filter = `
+    hue-rotate(${frameAdjustment.hue}deg)
+    saturate(${frameAdjustment.saturation}%)
+    brightness(${frameAdjustment.brightness}%)
+  `;
+}
       image.src = source;
       image.alt = category;
       image.draggable = false;
