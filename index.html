@@ -5,14 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#111111">
-
   <title>SUPER73 ZX SE Builder</title>
-
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="images/icons/icon-512.png">
 </head>
-
 <body>
 
 <header>
@@ -21,68 +18,91 @@
 </header>
 
 <main>
-
   <section class="preview">
     <div class="preview-label">YOUR BUILD</div>
-
     <div id="bike-preview">
       <h2>SUPER73 ZX SE</h2>
       <p>Your custom bike will appear here.</p>
     </div>
 
     <div id="save-controls">
-      <button type="button" onclick="saveBike()">Save Bike</button>
-      <button type="button" onclick="saveBikeAsNew()">Save As New</button>
+      <button onclick="saveBike()">Save Bike</button>
+      <button onclick="saveBikeAsNew()">Save As New</button>
+    </div>
+    <p id="editing-status"></p>
+  </section>
+
+  <section class="custom-colors">
+    <h2>Frame Color Adjustments</h2>
+    <p>Customize the appearance of your frame.</p>
+
+    <div class="color-slider">
+      <label for="frame-hue">
+        Hue <span id="hue-value">0°</span>
+      </label>
+      <input type="range" id="frame-hue"
+        min="0" max="360" value="0"
+        oninput="changeFrameAdjustment('hue', this.value)">
     </div>
 
-    <p id="editing-status">Not currently editing a saved bike.</p>
+    <div class="color-slider">
+      <label for="frame-saturation">
+        Saturation <span id="saturation-value">100%</span>
+      </label>
+      <input type="range" id="frame-saturation"
+        min="0" max="200" value="100"
+        oninput="changeFrameAdjustment('saturation', this.value)">
+    </div>
+
+    <div class="color-slider">
+      <label for="frame-brightness">
+        Brightness <span id="brightness-value">100%</span>
+      </label>
+      <input type="range" id="frame-brightness"
+        min="0" max="200" value="100"
+        oninput="changeFrameAdjustment('brightness', this.value)">
+    </div>
+
+    <button class="reset-colors" onclick="resetFrameAdjustments()">
+      Reset Adjustments
+    </button>
   </section>
 
   <section class="customizer">
     <h2>Customize Your Bike</h2>
 
     <div class="categories">
-      <button type="button" onclick="selectCategory('frame')">Frame</button>
-      <button type="button" onclick="selectCategory('frontForks')">Front Forks</button>
-      <button type="button" onclick="selectCategory('frontWheel')">Front Wheel</button>
-      <button type="button" onclick="selectCategory('rearWheel')">Rear Wheel</button>
-      <button type="button" onclick="selectCategory('tires')">Tires</button>
-      <button type="button" onclick="selectCategory('motor')">Motor</button>
-      <button type="button" onclick="selectCategory('handlebars')">Handlebars</button>
-      <button type="button" onclick="selectCategory('seat')">Seat</button>
-      <button type="button" onclick="selectCategory('battery')">Battery</button>
-      <button type="button" onclick="selectCategory('fenders')">Fenders + Plates</button>
-      <button type="button" onclick="selectCategory('lights')">Lights</button>
-      <button type="button" onclick="selectCategory('accessories')">Accessories</button>
+      <button onclick="selectCategory('frame')">Frame</button>
+      <button onclick="selectCategory('frontForks')">Front Forks</button>
+      <button onclick="selectCategory('frontWheel')">Front Wheel</button>
+      <button onclick="selectCategory('rearWheel')">Rear Wheel</button>
+      <button onclick="selectCategory('tires')">Tires</button>
+      <button onclick="selectCategory('motor')">Motor</button>
+      <button onclick="selectCategory('handlebars')">Handlebars</button>
+      <button onclick="selectCategory('seat')">Seat</button>
+      <button onclick="selectCategory('battery')">Battery</button>
+      <button onclick="selectCategory('fenders')">Fenders + Plates</button>
+      <button onclick="selectCategory('lights')">Lights</button>
+      <button onclick="selectCategory('accessories')">Accessories</button>
     </div>
 
-    <div id="parts-list">
-      Select a category to customize.
-    </div>
+    <div id="parts-list">Select a category to customize.</div>
   </section>
 
   <section class="garage">
-
     <div class="garage-heading">
       <div>
         <h2>My Garage</h2>
         <p>Your saved custom bikes.</p>
       </div>
-
-      <button type="button" onclick="showSavedBikes()">
-        Refresh Garage
-      </button>
+      <button onclick="showSavedBikes()">Refresh Garage</button>
     </div>
-
     <div id="saved-bikes">
       <p>Your garage is empty. Save a bike to get started.</p>
     </div>
-
   </section>
-
 </main>
 
 <script src="script.js"></script>
-
 </body>
 </html>
