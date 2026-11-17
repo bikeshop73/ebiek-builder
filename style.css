@@ -1,5 +1,7 @@
 
-/* GENERAL */
+/* =====================================
+   GENERAL
+===================================== */
 
 * {
   margin: 0;
@@ -14,7 +16,9 @@ body {
 }
 
 
-/* HEADER */
+/* =====================================
+   HEADER
+===================================== */
 
 header {
   background: #191919;
@@ -36,7 +40,9 @@ header p {
 }
 
 
-/* LAYOUT */
+/* =====================================
+   PAGE LAYOUT
+===================================== */
 
 main {
   max-width: 1100px;
@@ -45,7 +51,9 @@ main {
 }
 
 
-/* BUTTONS */
+/* =====================================
+   BUTTONS
+===================================== */
 
 button {
   background: #252525;
@@ -54,7 +62,7 @@ button {
   padding: 13px 20px;
   border-radius: 7px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 button:hover {
@@ -63,7 +71,9 @@ button:hover {
 }
 
 
-/* PREVIEW */
+/* =====================================
+   BIKE PREVIEW
+===================================== */
 
 .preview {
   background: #1c1c1c;
@@ -89,6 +99,10 @@ button:hover {
   margin-bottom: 15px;
 }
 
+#bike-preview > p {
+  color: #888;
+}
+
 .preview-canvas-holder {
   width: 100%;
   margin: auto;
@@ -104,12 +118,10 @@ button:hover {
   user-select: none;
 }
 
-.color-overlay {
-  pointer-events: none;
-}
 
-
-/* SAVE CONTROLS */
+/* =====================================
+   SAVE CONTROLS
+===================================== */
 
 #save-controls {
   display: flex;
@@ -127,58 +139,9 @@ button:hover {
 }
 
 
-/* CUSTOM COLORS */
-
-.custom-colors {
-  background: #1c1c1c;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 25px;
-  margin-top: 25px;
-}
-
-.custom-colors h2 {
-  margin-bottom: 8px;
-}
-
-.custom-colors > p {
-  color: #888;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-.color-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-}
-
-.color-control {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.color-control label {
-  font-size: 14px;
-}
-
-.color-control input[type="color"] {
-  width: 55px;
-  height: 40px;
-  padding: 3px;
-  background: #252525;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.reset-colors {
-  margin-top: 20px;
-}
-
-
-/* CUSTOMIZER */
+/* =====================================
+   CUSTOMIZER
+===================================== */
 
 .customizer {
   margin-top: 30px;
@@ -239,7 +202,9 @@ button:hover {
 }
 
 
-/* MY GARAGE */
+/* =====================================
+   MY GARAGE
+===================================== */
 
 .garage {
   background: #1c1c1c;
@@ -324,7 +289,9 @@ button:hover {
 }
 
 
-/* MOBILE */
+/* =====================================
+   MOBILE
+===================================== */
 
 @media (max-width: 600px) {
 
@@ -338,14 +305,8 @@ button:hover {
   }
 
   .preview,
-  .custom-colors,
   .garage {
     padding: 17px;
-  }
-
-  .color-controls {
-    flex-direction: column;
-    gap: 15px;
   }
 
   .garage-heading {
@@ -360,9 +321,11 @@ button:hover {
     width: 100%;
   }
 
-}
-
-  .bike-canvas canvas {
-    display: block;
-    pointer-events: none;
+  #save-controls {
+    flex-direction: column;
   }
+
+  #save-controls button {
+    width: 100%;
+  }
+}
