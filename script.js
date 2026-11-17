@@ -234,7 +234,7 @@ function addColorOverlay(canvas, source, position, color, zIndex) {
   overlay.style.webkitMaskRepeat = "no-repeat";
 
   // Color Burn blending
-  overlay.style.mixBlendMode = "color";
+  overlay.style.mixBlendMode = "hue";
   overlay.style.opacity = "1";
   
   overlay.style.zIndex = String(zIndex);
