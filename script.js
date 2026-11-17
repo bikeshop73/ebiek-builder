@@ -209,37 +209,46 @@ function getLayerPosition(category, position) {
 
 
 function addColorOverlay(canvas, source, position, color, zIndex) {
-  const overlay = document.createElement("div");
+  // Wrapper holds both layers at the exact same position & mask
+  const wrapper = document.createElement("div");
+  wrapper.className = "color-overlay-wrapper";
+  wrapper.style.position = "absolute";
+  wrapper.style.left = position.left;
+  wrapper.style.top = position.top;
+  wrapper.style.width = position.width;
+  wrapper.style.height = position.height;
+  wrapper.style.zIndex = String(zIndex);
+  wrapper.style.pointerEvents = "none";
 
-  overlay.className = "color-overlay";
+  // Helper to apply your exact mask settings
+  const applyMask = (el) => {
+    el.style.position = "absolute";
+    el.style.inset = "0";
+    el.style.maskImage = `url("${source}")`;
+    el.style.webkitMaskImage = `url("${source}")`;
+    el.style.maskSize = "contain";
+    el.style.webkitMaskSize = "contain";
+    el.style.maskPosition = "center";
+    el.style.webkitMaskPosition = "center";
+    el.style.maskRepeat = "no-repeat";
+    el.style.webkitMaskRepeat = "no-repeat";
+  };
 
-  overlay.style.position = "absolute";
-  overlay.style.left = position.left;
-  overlay.style.top = position.top;
-  overlay.style.width = position.width;
-  overlay.style.height = position.height;
+  // LAYER 1: Lifts pure black rims into shaded mid-gray (preserves 3D highlights & shadows)
+  const baseLift = document.createElement("div");
+  applyMask(baseLift);
+  baseLift.style.backgroundColor = "#5a5a5a"; // Increase to #777777 for brighter colors, #3a3a3a for darker
+  baseLift.style.mixBlendMode = "screen";
 
-  overlay.style.backgroundColor = color;
+  // LAYER 2: Paints the lifted gray rims with your realistic metallic/anodized color
+  const colorTint = document.createElement("div");
+  applyMask(colorTint);
+  colorTint.style.backgroundColor = color;
+  colorTint.style.mixBlendMode = "hard-light"; // Swap to "multiply" for deeper/matte colors
 
-  overlay.style.maskImage = `url("${source}")`;
-  overlay.style.webkitMaskImage = `url("${source}")`;
-
-  overlay.style.maskSize = "contain";
-  overlay.style.webkitMaskSize = "contain";
-
-  overlay.style.maskPosition = "center";
-  overlay.style.webkitMaskPosition = "center";
-
-  overlay.style.maskRepeat = "no-repeat";
-  overlay.style.webkitMaskRepeat = "no-repeat";
-
-  // Color Burn blending
-  overlay.style.mixBlendMode = "hue";
-  overlay.style.opacity = "1";
-  
-  overlay.style.zIndex = String(zIndex);
-
-  canvas.appendChild(overlay);
+  wrapper.appendChild(baseLift);
+  wrapper.appendChild(colorTint);
+  canvas.appendChild(wrapper);
 }
 
 
