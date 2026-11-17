@@ -1,7 +1,8 @@
 
 // =============================================
 // SUPER73 ZX SE BIKE BUILDER
-// COMPLETE SCRIPT
+// COMPLETE SCRIPT - WITH MY GARAGE
+// NO CUSTOM COLORS
 // =============================================
 
 
@@ -39,7 +40,10 @@ const parts = {
     "IMG_5986.PNG"
   ],
 
-  motor: ["IMG_5959.PNG", "IMG_5993.PNG"],
+  motor: [
+    "IMG_5959.PNG",
+    "IMG_5993.PNG"
+  ],
 
   handlebars: [
     "IMG_5980.PNG", "IMG_5981.PNG",
@@ -71,7 +75,9 @@ const parts = {
     "IMG_5991.PNG"
   ],
 
-  lights: ["IMG_5992.PNG"],
+  lights: [
+    "IMG_5992.PNG"
+  ],
 
   accessories: [
     "IMG_6030.PNG",
@@ -108,11 +114,6 @@ const folders = {
 // =============================================
 
 let selectedParts = {};
-
-let selectedColors = {
-  frame: "#000000",
-  accent: "#000000"
-};
 
 let editingBikeId = null;
 
@@ -171,49 +172,68 @@ function imagePath(category, filename) {
 function getLayerPosition(category, position) {
 
   const positions = {
+
     frontForks: {
-      left: "42%", top: "7%",
-      width: "58%", height: "78%"
+      left: "42%",
+      top: "7%",
+      width: "58%",
+      height: "78%"
     },
 
     frontWheel: {
-      left: "70%", top: "53%",
-      width: "27%", height: "27%"
+      left: "70%",
+      top: "53%",
+      width: "27%",
+      height: "27%"
     },
 
     rearWheel: {
-      left: "4%", top: "52%",
-      width: "27%", height: "27%"
+      left: "4%",
+      top: "52%",
+      width: "27%",
+      height: "27%"
     },
 
     rearTire: {
-      left: "1%", top: "48%",
-      width: "34%", height: "34%"
+      left: "1%",
+      top: "48%",
+      width: "34%",
+      height: "34%"
     },
 
     frontTire: {
-      left: "66.5%", top: "49%",
-      width: "34%", height: "34%"
+      left: "66.5%",
+      top: "49%",
+      width: "34%",
+      height: "34%"
     },
 
     motor: {
-      left: "5.5%", top: "52.5%",
-      width: "24%", height: "24%"
+      left: "5.5%",
+      top: "52.5%",
+      width: "24%",
+      height: "24%"
     },
 
     handlebars: {
-      left: "53.5%", top: "13%",
-      width: "24%", height: "24%"
+      left: "53.5%",
+      top: "13%",
+      width: "24%",
+      height: "24%"
     },
 
     fenders: {
-      left: "57.5%", top: "22%",
-      width: "29%", height: "29%"
+      left: "57.5%",
+      top: "22%",
+      width: "29%",
+      height: "29%"
     },
 
     lights: {
-      left: "64%", top: "27%",
-      width: "10%", height: "10%"
+      left: "64%",
+      top: "27%",
+      width: "10%",
+      height: "10%"
     }
   };
 
@@ -233,66 +253,12 @@ function getLayerPosition(category, position) {
 
 
 // =============================================
-// COLOR OVERLAY
-// =============================================
-
-function addColorOverlay(
-  canvas,
-  source,
-  position,
-  color,
-  zIndex
-) {
-
-  const overlay = document.createElement("div");
-
-  overlay.className = "color-overlay";
-
-  Object.assign(overlay.style, {
-    position: "absolute",
-    left: position.left,
-    top: position.top,
-    width: position.width,
-    height: position.height,
-
-    backgroundColor: color,
-
-    maskImage: `url("${source}")`,
-    webkitMaskImage: `url("${source}")`,
-
-    maskSize: "contain",
-    webkitMaskSize: "contain",
-
-    maskPosition: "center",
-    webkitMaskPosition: "center",
-
-    maskRepeat: "no-repeat",
-    webkitMaskRepeat: "no-repeat",
-
-    // SCREEN COLORING
-    // Helps bring color into dark parts
-    // without using the old darkening effect.
-
-    mixBlendMode: "screen",
-    opacity: "0.85",
-
-    zIndex: String(zIndex),
-
-    pointerEvents: "none"
-  });
-
-  canvas.appendChild(overlay);
-}
-
-
-// =============================================
 // CREATE BIKE CANVAS
 // =============================================
 
 function createBikeCanvas(
   parent,
   partsToShow,
-  colorsToShow,
   thumbnail = false
 ) {
 
@@ -349,42 +315,10 @@ function createBikeCanvas(
       });
 
       image.onerror = () => {
-        console.error("Image failed:", source);
+        console.error("Preview image failed:", source);
       };
 
       canvas.appendChild(image);
-
-      // FRAME COLOR
-
-      if (
-        category === "frame" &&
-        colorsToShow.frame
-      ) {
-        addColorOverlay(
-          canvas,
-          source,
-          position,
-          colorsToShow.frame,
-          layerIndex + 1.5
-        );
-      }
-
-      // WHEEL COLORS
-      // Tires are separate layers, so the wheel
-      // color overlay only targets the wheel image.
-
-      if (
-        category === "frontWheel" ||
-        category === "rearWheel"
-      ) {
-        addColorOverlay(
-          canvas,
-          source,
-          position,
-          colorsToShow.accent || "#000000",
-          layerIndex + 1.5
-        );
-      }
 
     });
 
@@ -422,60 +356,8 @@ function updatePreview() {
 
   createBikeCanvas(
     holder,
-    selectedParts,
-    selectedColors
+    selectedParts
   );
-}
-
-
-// =============================================
-// CUSTOM COLORS
-// =============================================
-
-function changeColor(type, color) {
-
-  if (type !== "frame" && type !== "accent") {
-    return;
-  }
-
-  selectedColors[type] = color;
-
-  updatePreview();
-}
-
-
-// =============================================
-// RESET COLORS
-// =============================================
-
-function resetColors() {
-
-  selectedColors = {
-    frame: "#000000",
-    accent: "#000000"
-  };
-
-  updateColorInputs();
-  updatePreview();
-}
-
-
-// =============================================
-// UPDATE COLOR INPUTS
-// =============================================
-
-function updateColorInputs() {
-
-  const frame = document.getElementById("frame-color");
-  const accent = document.getElementById("accent-color");
-
-  if (frame) {
-    frame.value = selectedColors.frame || "#000000";
-  }
-
-  if (accent) {
-    accent.value = selectedColors.accent || "#000000";
-  }
 }
 
 
@@ -555,7 +437,7 @@ function selectCategory(category) {
 
 function selectPart(category, filename, index) {
 
-  // BATTERIES
+  // BATTERY RULES
   // Maximum two adjacent batteries.
 
   if (category === "battery") {
@@ -597,7 +479,7 @@ function selectPart(category, filename, index) {
     }
   }
 
-  // ACCESSORIES
+  // ACCESSORY RULES
   // Maximum two approved combinations.
 
   else if (category === "accessories") {
@@ -653,7 +535,6 @@ function selectPart(category, filename, index) {
     } else {
       selectedParts[category] = filename;
     }
-
   }
 
   updatePreview();
@@ -724,9 +605,9 @@ function saveBike() {
 
     if (bike) {
 
-      bike.parts = JSON.parse(JSON.stringify(selectedParts));
-
-      bike.colors = JSON.parse(JSON.stringify(selectedColors));
+      bike.parts = JSON.parse(
+        JSON.stringify(selectedParts)
+      );
 
       if (!storeSavedBikes(savedBikes)) return;
 
@@ -748,8 +629,7 @@ function saveBike() {
   const newBike = {
     id: Date.now(),
     name: name.trim(),
-    parts: JSON.parse(JSON.stringify(selectedParts)),
-    colors: JSON.parse(JSON.stringify(selectedColors))
+    parts: JSON.parse(JSON.stringify(selectedParts))
   };
 
   savedBikes.push(newBike);
@@ -780,8 +660,7 @@ function saveBikeAsNew() {
   const newBike = {
     id: Date.now(),
     name: name.trim(),
-    parts: JSON.parse(JSON.stringify(selectedParts)),
-    colors: JSON.parse(JSON.stringify(selectedColors))
+    parts: JSON.parse(JSON.stringify(selectedParts))
   };
 
   savedBikes.push(newBike);
@@ -813,16 +692,26 @@ function loadBike(id) {
     JSON.stringify(bike.parts || {})
   );
 
-  selectedColors = {
-    frame: bike.colors?.frame || "#000000",
-    accent: bike.colors?.accent || "#000000"
-  };
-
   editingBikeId = bike.id;
 
-  updateColorInputs();
   updatePreview();
   updateEditingStatus();
+
+  // Restore the currently selected category.
+
+  const activeHeading = document.querySelector("#parts-list h3");
+
+  if (activeHeading) {
+    const category = Object.keys(parts).find(key => {
+      const label = key === "fenders"
+        ? "Fenders + Plates"
+        : key.replace(/([A-Z])/g, " $1");
+
+      return label.toLowerCase() === activeHeading.textContent.toLowerCase();
+    });
+
+    if (category) selectCategory(category);
+  }
 
   window.scrollTo({
     top: 0,
@@ -931,10 +820,6 @@ function showSavedBikes() {
     createBikeCanvas(
       preview,
       bike.parts || {},
-      bike.colors || {
-        frame: "#000000",
-        accent: "#000000"
-      },
       true
     );
 
@@ -1010,12 +895,8 @@ function updateEditingStatus() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  updateColorInputs();
-
   updatePreview();
-
   showSavedBikes();
-
   updateEditingStatus();
 
   console.log("SUPER73 ZX SE Builder loaded successfully.");
