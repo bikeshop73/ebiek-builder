@@ -1198,3 +1198,27 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("SUPER73 ZX SE Builder loaded successfully.");
 
 });
+
+function changeFrameAdjustment() {
+  selectedColors.hue =
+    Number(document.getElementById("frame-hue").value);
+
+  selectedColors.saturation =
+    Number(document.getElementById("frame-saturation").value);
+
+  selectedColors.brightness =
+    Number(document.getElementById("frame-brightness").value);
+
+  updatePreview();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  ["frame-hue", "frame-saturation", "frame-brightness"]
+    .forEach(id => {
+      const slider = document.getElementById(id);
+
+      if (slider) {
+        slider.addEventListener("input", changeFrameAdjustment);
+      }
+    });
+});
