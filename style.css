@@ -1,8 +1,4 @@
 
-/* =====================================
-   GENERAL
-===================================== */
-
 * {
   margin: 0;
   padding: 0;
@@ -14,11 +10,6 @@ body {
   color: white;
   font-family: Arial, sans-serif;
 }
-
-
-/* =====================================
-   HEADER
-===================================== */
 
 header {
   background: #191919;
@@ -39,21 +30,11 @@ header p {
   font-size: 12px;
 }
 
-
-/* =====================================
-   PAGE LAYOUT
-===================================== */
-
 main {
   max-width: 1100px;
   margin: auto;
   padding: 25px;
 }
-
-
-/* =====================================
-   BUTTONS
-===================================== */
 
 button {
   background: #252525;
@@ -62,7 +43,7 @@ button {
   padding: 13px 20px;
   border-radius: 7px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background .2s, border-color .2s;
 }
 
 button:hover {
@@ -70,10 +51,7 @@ button:hover {
   border-color: #d71920;
 }
 
-
-/* =====================================
-   BIKE PREVIEW
-===================================== */
+/* PREVIEW */
 
 .preview {
   background: #1c1c1c;
@@ -118,10 +96,7 @@ button:hover {
   user-select: none;
 }
 
-
-/* =====================================
-   SAVE CONTROLS
-===================================== */
+/* SAVE */
 
 #save-controls {
   display: flex;
@@ -138,10 +113,53 @@ button:hover {
   margin-top: 12px;
 }
 
+/* FRAME ADJUSTMENTS */
 
-/* =====================================
-   CUSTOMIZER
-===================================== */
+.custom-colors {
+  margin-top: 25px;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.custom-colors h2 {
+  margin-bottom: 8px;
+}
+
+.custom-colors > p {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 22px;
+}
+
+.color-slider {
+  margin-bottom: 22px;
+}
+
+.color-slider label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.color-slider label span {
+  color: #d71920;
+  font-weight: bold;
+}
+
+.color-slider input {
+  width: 100%;
+  accent-color: #d71920;
+  cursor: pointer;
+}
+
+.reset-colors {
+  margin-top: 5px;
+}
+
+/* CUSTOMIZER */
 
 .customizer {
   margin-top: 30px;
@@ -193,7 +211,6 @@ button:hover {
   height: 70px;
   max-width: 100%;
   object-fit: contain;
-  display: block;
 }
 
 #parts-list .part-option.selected {
@@ -201,10 +218,7 @@ button:hover {
   background: #351719;
 }
 
-
-/* =====================================
-   MY GARAGE
-===================================== */
+/* GARAGE */
 
 .garage {
   background: #1c1c1c;
@@ -288,13 +302,9 @@ button:hover {
   color: white;
 }
 
-
-/* =====================================
-   MOBILE
-===================================== */
+/* MOBILE */
 
 @media (max-width: 600px) {
-
   main {
     padding: 14px;
   }
@@ -305,7 +315,8 @@ button:hover {
   }
 
   .preview,
-  .garage {
+  .garage,
+  .custom-colors {
     padding: 17px;
   }
 
