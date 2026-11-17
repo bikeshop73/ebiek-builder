@@ -1,11 +1,10 @@
+
 // =====================================
 // SUPER73 ZX SE BIKE BUILDER
 // =====================================
 
 
-// =====================================
 // PART IMAGES
-// =====================================
 
 const parts = {
   frame: [
@@ -38,10 +37,7 @@ const parts = {
     "IMG_5986.PNG"
   ],
 
-  motor: [
-    "IMG_5959.PNG",
-    "IMG_5993.PNG"
-  ],
+  motor: ["IMG_5959.PNG", "IMG_5993.PNG"],
 
   handlebars: [
     "IMG_5980.PNG", "IMG_5981.PNG",
@@ -73,9 +69,7 @@ const parts = {
     "IMG_5991.PNG"
   ],
 
-  lights: [
-    "IMG_5992.PNG"
-  ],
+  lights: ["IMG_5992.PNG"],
 
   accessories: [
     "IMG_6030.PNG",
@@ -87,9 +81,7 @@ const parts = {
 };
 
 
-// =====================================
 // IMAGE FOLDERS
-// =====================================
 
 const folders = {
   frame: "Frames",
@@ -107,23 +99,19 @@ const folders = {
 };
 
 
-// =====================================
 // CURRENT BUILD
-// =====================================
 
 let selectedParts = {};
 
 let selectedColors = {
-  frame: "#202020",
-  accent: "#d71920"
+  frame: "#000000",
+  accent: "#000000"
 };
 
 let editingBikeId = null;
 
 
-// =====================================
 // ACCESSORY COMBINATIONS
-// =====================================
 
 const allowedAccessoryPairs = [
   [0, 1],
@@ -135,9 +123,7 @@ const allowedAccessoryPairs = [
 ];
 
 
-// =====================================
-// PREVIEW LAYER ORDER
-// =====================================
+// LAYER ORDER
 
 const layers = [
   { category: "tires", position: "rear" },
@@ -156,9 +142,7 @@ const layers = [
 ];
 
 
-// =====================================
 // IMAGE PATH
-// =====================================
 
 function imagePath(category, filename) {
   return new URL(
@@ -168,91 +152,44 @@ function imagePath(category, filename) {
 }
 
 
-// =====================================
 // PART POSITIONING
-// =====================================
 
 function getLayerPosition(category, position) {
 
   if (category === "frontForks") {
-    return {
-      left: "42%",
-      top: "7%",
-      width: "58%",
-      height: "78%"
-    };
+    return { left: "42%", top: "7%", width: "58%", height: "78%" };
   }
 
   if (category === "frontWheel") {
-    return {
-      left: "70%",
-      top: "53%",
-      width: "27%",
-      height: "27%"
-    };
+    return { left: "70%", top: "53%", width: "27%", height: "27%" };
   }
 
   if (category === "rearWheel") {
-    return {
-      left: "4%",
-      top: "52%",
-      width: "27%",
-      height: "27%"
-    };
+    return { left: "4%", top: "52%", width: "27%", height: "27%" };
   }
 
   if (category === "tires" && position === "rear") {
-    return {
-      left: "1%",
-      top: "48%",
-      width: "34%",
-      height: "34%"
-    };
+    return { left: "1%", top: "48%", width: "34%", height: "34%" };
   }
 
   if (category === "tires" && position === "front") {
-    return {
-      left: "66.5%",
-      top: "49%",
-      width: "34%",
-      height: "34%"
-    };
+    return { left: "66.5%", top: "49%", width: "34%", height: "34%" };
   }
 
   if (category === "motor") {
-    return {
-      left: "5.5%",
-      top: "52.5%",
-      width: "24%",
-      height: "24%"
-    };
+    return { left: "5.5%", top: "52.5%", width: "24%", height: "24%" };
   }
 
   if (category === "handlebars") {
-    return {
-      left: "53.5%",
-      top: "13%",
-      width: "24%",
-      height: "24%"
-    };
+    return { left: "53.5%", top: "13%", width: "24%", height: "24%" };
   }
 
   if (category === "fenders") {
-    return {
-      left: "57.5%",
-      top: "22%",
-      width: "29%",
-      height: "29%"
-    };
+    return { left: "57.5%", top: "22%", width: "29%", height: "29%" };
   }
 
   if (category === "lights") {
-    return {
-      left: "64%",
-      top: "27%",
-      width: "10%",
-      height: "10%"
-    };
+    return { left: "64%", top: "27%", width: "10%", height: "10%" };
   }
 
   return {
@@ -265,8 +202,48 @@ function getLayerPosition(category, position) {
 
 
 // =====================================
-// CREATE BIKE PREVIEW CANVAS
+// COLOR OVERLAY
+// Uses the transparent image pixels as a mask.
+// This avoids the old color-blending problem.
 // =====================================
+
+function addColorOverlay(canvas, source, position, color, zIndex) {
+
+  const overlay = document.createElement("div");
+
+  overlay.className = "color-overlay";
+
+  Object.assign(overlay.style, {
+    position: "absolute",
+    left: position.left,
+    top: position.top,
+    width: position.width,
+    height: position.height,
+    backgroundColor: color,
+    zIndex: String(zIndex),
+    pointerEvents: "none"
+  });
+
+  overlay.style.maskImage = `url("${source}")`;
+  overlay.style.webkitMaskImage = `url("${source}")`;
+
+  overlay.style.maskSize = "contain";
+  overlay.style.webkitMaskSize = "contain";
+
+  overlay.style.maskPosition = "center";
+  overlay.style.webkitMaskPosition = "center";
+
+  overlay.style.maskRepeat = "no-repeat";
+  overlay.style.webkitMaskRepeat = "no-repeat";
+
+  overlay.style.maskMode = "alpha";
+  overlay.style.mixBlendMode = "normal";
+
+  canvas.appendChild(overlay);
+}
+
+
+// CREATE BIKE CANVAS
 
 function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) {
 
@@ -282,29 +259,21 @@ function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) 
   canvas.style.aspectRatio = "1 / 1";
   canvas.style.margin = "auto";
 
-  layers.forEach(layer => {
+  layers.forEach((layer, layerIndex) => {
 
     const category = layer.category;
     const selected = partsToShow[category];
 
     if (!selected) return;
 
-    let filenames = [];
-
-    if (Array.isArray(selected)) {
-      filenames = selected;
-    } else {
-      filenames = [selected];
-    }
+    const filenames = Array.isArray(selected)
+      ? selected
+      : [selected];
 
     filenames.forEach(filename => {
 
       const source = imagePath(category, filename);
-
-      const position = getLayerPosition(
-        category,
-        layer.position
-      );
+      const position = getLayerPosition(category, layer.position);
 
       const image = document.createElement("img");
 
@@ -312,40 +281,46 @@ function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) 
       image.alt = category;
       image.draggable = false;
 
-      image.style.position = "absolute";
-      image.style.left = position.left;
-      image.style.top = position.top;
-      image.style.width = position.width;
-      image.style.height = position.height;
-      image.style.objectFit = "contain";
-      image.style.zIndex = String(layers.indexOf(layer) + 1);
+      Object.assign(image.style, {
+        position: "absolute",
+        left: position.left,
+        top: position.top,
+        width: position.width,
+        height: position.height,
+        objectFit: "contain",
+        zIndex: String(layerIndex + 1)
+      });
 
       canvas.appendChild(image);
 
-      // Frame color overlay
-      if (category === "frame" && colorsToShow.frame) {
+      // FRAME COLOR
+      if (category === "frame") {
         addColorOverlay(
           canvas,
           source,
           position,
-          colorsToShow.frame,
-          layers.indexOf(layer) + 1.5
+          colorsToShow.frame || "#000000",
+          layerIndex + 1.5
         );
       }
 
-      // Accent color applies to wheel layers only
+      // WHEEL COLOR
       if (
-        (category === "frontWheel" || category === "rearWheel") &&
-        colorsToShow.accent
+        category === "frontWheel" ||
+        category === "rearWheel"
       ) {
         addColorOverlay(
           canvas,
           source,
           position,
-          colorsToShow.accent,
-          layers.indexOf(layer) + 1.5
+          colorsToShow.accent || "#000000",
+          layerIndex + 1.5
         );
       }
+
+      image.onerror = () => {
+        console.error("Preview image failed:", source);
+      };
 
     });
   });
@@ -356,45 +331,7 @@ function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) 
 }
 
 
-// =====================================
-// COLOR OVERLAY
-// =====================================
-
-function addColorOverlay(canvas, source, position, color, zIndex) {
-
-  const overlay = document.createElement("div");
-
-  overlay.className = "color-overlay";
-
-  overlay.style.position = "absolute";
-  overlay.style.left = position.left;
-  overlay.style.top = position.top;
-  overlay.style.width = position.width;
-  overlay.style.height = position.height;
-  overlay.style.backgroundColor = color;
-
-  overlay.style.maskImage = `url("${source}")`;
-  overlay.style.webkitMaskImage = `url("${source}")`;
-
-  overlay.style.maskSize = "contain";
-  overlay.style.webkitMaskSize = "contain";
-
-  overlay.style.maskPosition = "center";
-  overlay.style.webkitMaskPosition = "center";
-
-  overlay.style.maskRepeat = "no-repeat";
-  overlay.style.webkitMaskRepeat = "no-repeat";
-
-  overlay.style.mixBlendMode = "color";
-  overlay.style.zIndex = String(zIndex);
-
-  canvas.appendChild(overlay);
-}
-
-
-// =====================================
-// UPDATE MAIN PREVIEW
-// =====================================
+// UPDATE PREVIEW
 
 function updatePreview() {
 
@@ -405,28 +342,24 @@ function updatePreview() {
   preview.innerHTML = "";
 
   const title = document.createElement("h2");
-
   title.textContent = "SUPER73 ZX SE";
 
   preview.appendChild(title);
 
-  const canvasHolder = document.createElement("div");
+  const holder = document.createElement("div");
+  holder.className = "preview-canvas-holder";
 
-  canvasHolder.className = "preview-canvas-holder";
-
-  preview.appendChild(canvasHolder);
+  preview.appendChild(holder);
 
   createBikeCanvas(
-    canvasHolder,
+    holder,
     selectedParts,
     selectedColors
   );
 }
 
 
-// =====================================
 // CHANGE COLORS
-// =====================================
 
 function changeColor(type, color) {
 
@@ -436,48 +369,37 @@ function changeColor(type, color) {
 }
 
 
-// =====================================
 // RESET COLORS
-// =====================================
 
 function resetColors() {
 
-  selectedColors.frame = "#202020";
-  selectedColors.accent = "#d71920";
+  selectedColors.frame = "#000000";
+  selectedColors.accent = "#000000";
 
-  document.getElementById("frame-color").value =
-    selectedColors.frame;
-
-  document.getElementById("accent-color").value =
-    selectedColors.accent;
-
+  updateColorInputs();
   updatePreview();
 }
 
 
-// =====================================
 // UPDATE COLOR INPUTS
-// =====================================
 
 function updateColorInputs() {
 
-  document.getElementById("frame-color").value =
-    selectedColors.frame || "#202020";
+  const frame = document.getElementById("frame-color");
+  const accent = document.getElementById("accent-color");
 
-  document.getElementById("accent-color").value =
-    selectedColors.accent || "#d71920";
+  if (frame) frame.value = selectedColors.frame;
+  if (accent) accent.value = selectedColors.accent;
 }
 
 
-// =====================================
-// SELECT A CATEGORY
-// =====================================
+// SELECT CATEGORY
 
 function selectCategory(category) {
 
   const container = document.getElementById("parts-list");
 
-  if (!parts[category]) return;
+  if (!container || !parts[category]) return;
 
   container.innerHTML = "";
 
@@ -491,22 +413,22 @@ function selectCategory(category) {
   container.appendChild(heading);
 
   const options = document.createElement("div");
-
   options.className = "part-options";
 
   parts[category].forEach((filename, index) => {
 
     const option = document.createElement("button");
-
     option.className = "part-option";
 
     const image = document.createElement("img");
-
     image.src = imagePath(category, filename);
     image.alt = filename;
 
-    const name = document.createElement("span");
+    image.onerror = () => {
+      console.error("Thumbnail failed:", image.src);
+    };
 
+    const name = document.createElement("span");
     name.textContent = "Option " + (index + 1);
 
     option.appendChild(image);
@@ -534,27 +456,19 @@ function selectCategory(category) {
 }
 
 
-// =====================================
-// SELECT A PART
-// =====================================
+// SELECT PART
 
 function selectPart(category, filename, index) {
 
-  // BATTERY RULE:
-  // Maximum two batteries.
-  // If two are selected, they must be adjacent options.
+  // BATTERY RULES
 
   if (category === "battery") {
 
     let current = selectedParts.battery || [];
 
-    if (!Array.isArray(current)) {
-      current = [current];
-    }
+    if (!Array.isArray(current)) current = [current];
 
-    const alreadySelected = current.includes(filename);
-
-    if (alreadySelected) {
+    if (current.includes(filename)) {
 
       current = current.filter(item => item !== filename);
 
@@ -567,9 +481,9 @@ function selectPart(category, filename, index) {
 
       if (current.length === 1) {
 
-        const currentIndex = parts.battery.indexOf(current[0]);
+        const firstIndex = parts.battery.indexOf(current[0]);
 
-        if (Math.abs(currentIndex - index) !== 1) {
+        if (Math.abs(firstIndex - index) !== 1) {
           alert("Choose two batteries next to each other.");
           return;
         }
@@ -578,28 +492,22 @@ function selectPart(category, filename, index) {
       current.push(filename);
     }
 
-    if (current.length === 0) {
-      delete selectedParts.battery;
-    } else {
+    if (current.length) {
       selectedParts.battery = current;
+    } else {
+      delete selectedParts.battery;
     }
   }
 
-  // ACCESSORY RULE:
-  // Maximum two accessories.
-  // Two accessories must be one of the allowed pairs.
+  // ACCESSORY RULES
 
   else if (category === "accessories") {
 
     let current = selectedParts.accessories || [];
 
-    if (!Array.isArray(current)) {
-      current = [current];
-    }
+    if (!Array.isArray(current)) current = [current];
 
-    const alreadySelected = current.includes(filename);
-
-    if (alreadySelected) {
+    if (current.includes(filename)) {
 
       current = current.filter(item => item !== filename);
 
@@ -614,14 +522,9 @@ function selectPart(category, filename, index) {
 
         const firstIndex = parts.accessories.indexOf(current[0]);
 
-        const allowed = allowedAccessoryPairs.some(pair => {
-
-          return (
-            pair.includes(firstIndex) &&
-            pair.includes(index)
-          );
-
-        });
+        const allowed = allowedAccessoryPairs.some(pair =>
+          pair.includes(firstIndex) && pair.includes(index)
+        );
 
         if (!allowed) {
           alert("Those two accessories cannot be combined.");
@@ -632,15 +535,14 @@ function selectPart(category, filename, index) {
       current.push(filename);
     }
 
-    if (current.length === 0) {
-      delete selectedParts.accessories;
-    } else {
+    if (current.length) {
       selectedParts.accessories = current;
+    } else {
+      delete selectedParts.accessories;
     }
   }
 
-  // ALL OTHER PARTS:
-  // One selection per category.
+  // SINGLE-SELECTION PARTS
 
   else {
 
@@ -652,23 +554,18 @@ function selectPart(category, filename, index) {
   }
 
   updatePreview();
-
   selectCategory(category);
 }
 
 
-// =====================================
 // SAVED BIKES STORAGE
-// =====================================
 
 function getSavedBikes() {
 
   try {
-    return JSON.parse(
-      localStorage.getItem("savedBikes") || "[]"
-    );
+    return JSON.parse(localStorage.getItem("savedBikes") || "[]");
   } catch (error) {
-    console.error("Could not read saved bikes:", error);
+    console.error(error);
     return [];
   }
 }
@@ -683,16 +580,11 @@ function storeSavedBikes(bikes) {
 }
 
 
-// =====================================
 // SAVE BIKE
-// =====================================
 
 function saveBike() {
 
   const savedBikes = getSavedBikes();
-
-  // If a saved bike is currently being edited,
-  // update that saved bike instead of creating a duplicate.
 
   if (editingBikeId !== null) {
 
@@ -702,13 +594,8 @@ function saveBike() {
 
     if (bike) {
 
-      bike.parts = JSON.parse(
-        JSON.stringify(selectedParts)
-      );
-
-      bike.colors = JSON.parse(
-        JSON.stringify(selectedColors)
-      );
+      bike.parts = JSON.parse(JSON.stringify(selectedParts));
+      bike.colors = JSON.parse(JSON.stringify(selectedColors));
 
       storeSavedBikes(savedBikes);
 
@@ -745,9 +632,7 @@ function saveBike() {
 }
 
 
-// =====================================
-// SAVE AS NEW BIKE
-// =====================================
+// SAVE AS NEW
 
 function saveBikeAsNew() {
 
@@ -778,17 +663,11 @@ function saveBikeAsNew() {
 }
 
 
-// =====================================
 // LOAD BIKE
-// =====================================
 
 function loadBike(id) {
 
-  const savedBikes = getSavedBikes();
-
-  const bike = savedBikes.find(
-    item => item.id === id
-  );
+  const bike = getSavedBikes().find(item => item.id === id);
 
   if (!bike) return;
 
@@ -797,12 +676,10 @@ function loadBike(id) {
   );
 
   selectedColors = JSON.parse(
-    JSON.stringify(
-      bike.colors || {
-        frame: "#202020",
-        accent: "#d71920"
-      }
-    )
+    JSON.stringify(bike.colors || {
+      frame: "#000000",
+      accent: "#000000"
+    })
   );
 
   editingBikeId = bike.id;
@@ -820,52 +697,41 @@ function loadBike(id) {
 }
 
 
-// =====================================
 // RENAME BIKE
-// =====================================
 
 function renameBike(id) {
 
   const savedBikes = getSavedBikes();
 
-  const bike = savedBikes.find(
-    item => item.id === id
-  );
+  const bike = savedBikes.find(item => item.id === id);
 
   if (!bike) return;
 
-  const newName = prompt(
-    "Enter a new name:",
-    bike.name
-  );
+  const newName = prompt("Enter a new name:", bike.name);
 
   if (!newName || !newName.trim()) return;
 
   bike.name = newName.trim();
 
   storeSavedBikes(savedBikes);
-
   showSavedBikes();
+  updateEditingStatus();
 }
 
 
-// =====================================
 // DELETE BIKE
-// =====================================
 
 function deleteBike(id) {
 
-  const confirmed = confirm(
-    "Are you sure you want to delete this bike?"
-  );
+  if (!confirm("Are you sure you want to delete this bike?")) {
+    return;
+  }
 
-  if (!confirmed) return;
-
-  const savedBikes = getSavedBikes().filter(
+  const updated = getSavedBikes().filter(
     bike => bike.id !== id
   );
 
-  storeSavedBikes(savedBikes);
+  storeSavedBikes(updated);
 
   if (editingBikeId === id) {
     editingBikeId = null;
@@ -876,9 +742,7 @@ function deleteBike(id) {
 }
 
 
-// =====================================
-// SHOW MY GARAGE
-// =====================================
+// MY GARAGE
 
 function showSavedBikes() {
 
@@ -894,7 +758,8 @@ function showSavedBikes() {
 
     const empty = document.createElement("p");
 
-    empty.textContent = "Your garage is empty. Save a bike to get started.";
+    empty.textContent =
+      "Your garage is empty. Save a bike to get started.";
 
     container.appendChild(empty);
 
@@ -904,49 +769,38 @@ function showSavedBikes() {
   savedBikes.forEach(bike => {
 
     const card = document.createElement("div");
-
     card.className = "garage-card";
 
     const title = document.createElement("h3");
-
     title.textContent = bike.name;
 
     const preview = document.createElement("div");
-
     preview.className = "garage-bike-preview";
 
     createBikeCanvas(
       preview,
       bike.parts || {},
       bike.colors || {
-        frame: "#202020",
-        accent: "#d71920"
+        frame: "#000000",
+        accent: "#000000"
       },
       true
     );
 
     const buttons = document.createElement("div");
-
     buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
-
     loadButton.textContent = "Load / Edit";
-
     loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
-
     renameButton.textContent = "Rename";
-
     renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
-
     deleteButton.textContent = "Delete";
-
     deleteButton.className = "delete-button";
-
     deleteButton.onclick = () => deleteBike(bike.id);
 
     buttons.appendChild(loadButton);
@@ -963,9 +817,7 @@ function showSavedBikes() {
 }
 
 
-// =====================================
 // EDITING STATUS
-// =====================================
 
 function updateEditingStatus() {
 
@@ -974,9 +826,7 @@ function updateEditingStatus() {
   if (!status) return;
 
   if (editingBikeId === null) {
-
     status.textContent = "Not currently editing a saved bike.";
-
     return;
   }
 
@@ -990,18 +840,13 @@ function updateEditingStatus() {
 }
 
 
-// =====================================
-// INITIALIZE BUILDER
-// =====================================
+// INITIALIZE
 
 document.addEventListener("DOMContentLoaded", () => {
 
   updateColorInputs();
-
   updatePreview();
-
   showSavedBikes();
-
   updateEditingStatus();
 
 });
