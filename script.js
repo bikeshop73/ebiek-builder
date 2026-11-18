@@ -361,162 +361,23 @@ function imagePath(category, filename) {
   ).href;
 }
 
+
 /* =========================================
-   FRAME COLOR PROCESSING
+   FRAME COLOR PROCESSING - FIXED
 ========================================= */
 
-const frameImageCache = new Map();
+function getFrameFilter(colors) {
+  const hue = Number(colors?.hue ?? 0);
+  const saturation = Number(colors?.saturation ?? 100);
+  const brightness = Number(colors?.brightness ?? 100);
 
-function hslToRgb(h, s, l) {
-  h = ((h % 360) + 360) % 360;
-
-  s /= 100;
-  l /= 100;
-
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-  const m = l - c / 2;
-
-  let r = 0, g = 0, b = 0;
-
-  if (h < 60) [r, g, b] = [c, x, 0];
-  else if (h < 120) [r, g, b] = [x, c, 0];
-  else if (h < 180) [r, g, b] = [0, c, x];
-  else if (h < 240) [r, g, b] = [0, x, c];
-  else if (h < 300) [r, g, b] = [x, 0, c];
-  else [r, g, b] = [c, 0, x];
-
-  return [
-    Math.round((r + m) * 255),
-    Math.round((g + m) * 255),
-    Math.round((b + m) * 255)
-  ];
+  return `
+    hue-rotate(${hue}deg)
+    saturate(${saturation}%)
+    brightness(${brightness}%)
+  `.trim();
 }
 
-function colorizeFrameImage(source, colors, callback) {
-  const key = [
-    source,
-    colors.hue,
-    colors.saturation,
-    colors.brightness
-  ].join("|");
-
-  if (frameImageCache.has(key)) {
-    callback(frameImageCache.get(key));
-    return;
-  }
-
-  const image = new Image();
-
-  image.onload = () => {
-    try {
-      const canvas = document.createElement("canvas");
-
-      const context = canvas.getContext("2d", {
-        willReadFrequently: true
-      });
-
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-
-      context.drawImage(image, 0, 0);
-
-      const imageData = context.getImageData(
-        0, 0, canvas.width, canvas.height
-      );
-
-      const pixels = imageData.data;
-
-      const brightness = colors.brightness / 100;
-
-      for (let i = 0; i < pixels.length; i += 4) {
-        if (pixels[i + 3] === 0) continue;
-
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
-
-        const luminance =
-          (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-        const hsl = rgbToHsl(r, g, b);
-
-        const adjusted = hslToRgb(
-          colors.hue,
-          colors.saturation,
-          Math.min(100, Math.max(0, hsl.l * 100 * brightness))
-        );
-
-        pixels[i] = adjusted[0];
-        pixels[i + 1] = adjusted[1];
-        pixels[i + 2] = adjusted[2];
-      }
-
-      context.putImageData(imageData, 0, 0);
-
-      const result = canvas.toDataURL("image/png");
-
-      frameImageCache.set(key, result);
-
-      callback(result);
-
-    } catch (error) {
-      console.error("Frame coloring failed:", error);
-      callback(source);
-    }
-  };
-
-  image.onerror = () => {
-    console.error("Could not load frame image:", source);
-    callback(source);
-  };
-
-  image.src = source;
-}
-
-function rgbToHsl(r, g, b) {
-  r /= 255;
-  g /= 255;
-  b /= 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-
-  let h = 0;
-  let s = 0;
-
-  const l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-
-    s = l > 0.5
-      ? d / (2 - max - min)
-      : d / (max + min);
-
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-
-      case g:
-        h = (b - r) / d + 2;
-        break;
-
-      case b:
-        h = (r - g) / d + 4;
-        break;
-    }
-
-    h /= 6;
-  }
-
-  return {
-    h: h * 360,
-    s: s * 100,
-    l
-  };
-}
 
 /* =========================================
    PART POSITIONING
