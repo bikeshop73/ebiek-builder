@@ -1,11 +1,7 @@
 
 /* =========================================
    SUPER73 ZX SE BUILDER
-   OPTIMIZED LIVE VERSION
-========================================= */
-
-/* =========================================
-   PART IMAGES
+   COMPLETE SCRIPT
 ========================================= */
 
 const parts = {
@@ -15,36 +11,28 @@ const parts = {
     "IMG_5970.PNG", "IMG_5971.PNG", "IMG_5972.PNG",
     "IMG_5973.PNG", "IMG_5974.PNG", "IMG_5987.PNG"
   ],
-
   frontForks: [
     "IMG_5975.PNG", "IMG_5976.PNG", "IMG_5977.PNG",
     "IMG_5998.PNG", "IMG_5999.PNG", "IMG_5997.PNG",
     "IMG_6001.PNG", "IMG_5900.PNG"
   ],
-
   frontWheel: [
     "19B17299-2D11-4064-B836-D6700F3D255F.png",
     "IMG_5979.PNG"
   ],
-
   rearWheel: [
     "19B17299-2D11-4064-B836-D6700F3D255F.png",
     "IMG_5979.PNG"
   ],
-
   tires: [
     "644CD654-01BF-4AB7-A3F6-2FCABBD36835.png",
-    "IMG_5978.PNG",
-    "IMG_5986.PNG"
+    "IMG_5978.PNG", "IMG_5986.PNG"
   ],
-
   motor: ["IMG_5959.PNG", "IMG_5993.PNG"],
-
   handlebars: [
     "IMG_5980.PNG", "IMG_5981.PNG",
     "IMG_5982.PNG", "IMG_5983.PNG"
   ],
-
   seat: [
     "IMG_6004.PNG", "IMG_6005.PNG", "IMG_6006.PNG",
     "IMG_6007.PNG", "IMG_6008.PNG", "IMG_6009.PNG",
@@ -54,17 +42,12 @@ const parts = {
     "IMG_6019.PNG", "IMG_6020.PNG", "IMG_6021.PNG",
     "IMG_6022.PNG", "IMG_6023.PNG"
   ],
-
   battery: ["IMG_5984.PNG", "IMG_5985.PNG", "IMG_5988.PNG"],
-
   fenders: ["IMG_5989.PNG", "IMG_5990.PNG", "IMG_5991.PNG"],
-
   lights: ["IMG_5992.PNG"],
-
   accessories: [
-    "IMG_6030.PNG", "IMG_6031.PNG",
-    "IMG_6032.PNG", "IMG_6033.PNG",
-    "IMG_6034.PNG"
+    "IMG_6030.PNG", "IMG_6031.PNG", "IMG_6032.PNG",
+    "IMG_6033.PNG", "IMG_6034.PNG"
   ]
 };
 
@@ -84,6 +67,104 @@ const folders = {
 };
 
 /* =========================================
+   CUSTOM OPTION NAMES
+========================================= */
+
+const optionNames = {
+  frame: [
+    "White", "Red", "Orange", "Yellow", "Lime",
+    "Green", "Blue", "Purple", "Black",
+    "Cyan/White", "White/Pink", "Unlabeled Frame 12"
+  ],
+
+  frontForks: [
+    "Silver Inverted",
+    "Inverted",
+    "Gold Inverted",
+    "Silver Triple Clamp Normal",
+    "Silver Triple Clamp + Silver Bottom",
+    "Black Normal",
+    "Silver Bottom Normal",
+    "Bucklos"
+  ],
+
+  frontWheel: [
+    "Black",
+    "Chrome"
+  ],
+
+  rearWheel: [
+    "Black",
+    "Chrome"
+  ],
+
+  tires: [
+    "LZRD Tires",
+    "White Wall LZRD Tires",
+    "SuperSucker Tires"
+  ],
+
+  motor: [
+    "1350W",
+    "4,000W"
+  ],
+
+  handlebars: [
+    "Stock",
+    "Mountain Bike Bars",
+    "Harley Riser",
+    "ProTaper"
+  ],
+
+  seat: [
+    "White",
+    "Black",
+    "Red",
+    "Orange",
+    "Yellow",
+    "Lime",
+    "Green",
+    "Blue",
+    "Purple",
+    "Brown",
+    "Pink",
+    "Cyan",
+    "Red/Black",
+    "Orange/Black",
+    "Yellow/Black",
+    "Lime/Black",
+    "Blue/Black",
+    "Cyan/Black",
+    "Purple/Black",
+    "Pink/Black"
+  ],
+   
+  battery: [
+    "Surron Battery",
+    "Stock Battery",
+    "Chi Battery"
+  ],
+
+  fenders: [
+    "White Plate + Fender",
+    "Black Plate + Fender",
+    "Motocutz Plate"
+  ],
+
+  lights: [
+    "Baja"
+  ],
+
+  accessories: [
+    "Pedals",
+    "Rear Moto Pegs Silver",
+    "Silver Peg Swap",
+    "Rear Moto Pegs Black",
+    "Black Peg Swap"
+  ]
+};
+
+/* =========================================
    CURRENT BUILD
 ========================================= */
 
@@ -98,17 +179,9 @@ let selectedColors = {
 let editingBikeId = null;
 
 const allowedAccessoryPairs = [
-  [0, 1],
-  [0, 3],
-  [1, 2],
-  [1, 4],
-  [3, 4],
-  [2, 3]
+  [0, 1], [0, 3], [1, 2],
+  [1, 4], [3, 4], [2, 3]
 ];
-
-/* =========================================
-   LAYER ORDER
-========================================= */
 
 const layers = [
   { category: "tires", position: "rear" },
@@ -122,13 +195,9 @@ const layers = [
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
-  { category: "accessories" },
-  { category: "battery" }
+  { category: "battery" },
+  { category: "accessories" }
 ];
-
-/* =========================================
-   IMAGE PATHS
-========================================= */
 
 function imagePath(category, filename) {
   return new URL(
@@ -138,23 +207,111 @@ function imagePath(category, filename) {
 }
 
 /* =========================================
-   FAST FRAME FILTER
+   FRAME COLOR PROCESSING
 ========================================= */
 
-function getFrameFilter(colors) {
-  return `
-    hue-rotate(${colors.hue}deg)
-    saturate(${colors.saturation}%)
-    brightness(${colors.brightness}%)
-  `.replace(/\s+/g, " ").trim();
+const frameImageCache = new Map();
+
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s /= 100;
+  l /= 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+
+  let r = 0, g = 0, b = 0;
+
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+
+  return [
+    Math.round((r + m) * 255),
+    Math.round((g + m) * 255),
+    Math.round((b + m) * 255)
+  ];
 }
 
-function applyFrameFilter(image, colors) {
-  if (!image) return;
+function colorizeFrameImage(source, colors, callback) {
+  const key = [
+    source, colors.hue,
+    colors.saturation, colors.brightness
+  ].join("|");
 
-  image.style.filter = getFrameFilter(colors);
-  image.style.webkitFilter = getFrameFilter(colors);
-  image.style.willChange = "filter";
+  if (frameImageCache.has(key)) {
+    callback(frameImageCache.get(key));
+    return;
+  }
+
+  const image = new Image();
+
+  image.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", {
+        willReadFrequently: true
+      });
+
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+
+      context.drawImage(image, 0, 0);
+
+      const imageData = context.getImageData(
+        0, 0, canvas.width, canvas.height
+      );
+
+      const pixels = imageData.data;
+
+      const target = hslToRgb(
+        colors.hue,
+        colors.saturation,
+        50
+      );
+
+      const brightness = colors.brightness / 100;
+
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] === 0) continue;
+
+        const r = pixels[i];
+        const g = pixels[i + 1];
+        const b = pixels[i + 2];
+
+        const luminance =
+          (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+        const shade = (0.22 + luminance * 0.78) * brightness;
+
+        pixels[i] = Math.min(255, target[0] * shade);
+        pixels[i + 1] = Math.min(255, target[1] * shade);
+        pixels[i + 2] = Math.min(255, target[2] * shade);
+      }
+
+      context.putImageData(imageData, 0, 0);
+
+      const result = canvas.toDataURL("image/png");
+
+      frameImageCache.set(key, result);
+      callback(result);
+
+    } catch (error) {
+      console.error("Frame coloring failed:", error);
+      callback(source);
+    }
+  };
+
+  image.onerror = () => {
+    console.error("Could not load frame image:", source);
+    callback(source);
+  };
+
+  image.src = source;
 }
 
 /* =========================================
@@ -167,42 +324,34 @@ function getLayerPosition(category, position) {
       left: "42%", top: "7%",
       width: "58%", height: "78%"
     },
-
     frontWheel: {
       left: "70%", top: "53%",
       width: "27%", height: "27%"
     },
-
     rearWheel: {
       left: "4%", top: "52%",
       width: "27%", height: "27%"
     },
-
     rearTire: {
       left: "1%", top: "48%",
       width: "34%", height: "34%"
     },
-
     frontTire: {
       left: "66.5%", top: "49%",
       width: "34%", height: "34%"
     },
-
     motor: {
       left: "5.5%", top: "52.5%",
       width: "24%", height: "24%"
     },
-
     handlebars: {
       left: "53.5%", top: "13%",
       width: "24%", height: "24%"
     },
-
     fenders: {
       left: "57.5%", top: "22%",
       width: "29%", height: "29%"
     },
-
     lights: {
       left: "64%", top: "27%",
       width: "10%", height: "10%"
@@ -245,8 +394,7 @@ function createBikeCanvas(
     maxWidth: thumbnail ? "260px" : "700px",
     aspectRatio: "1 / 1",
     margin: "auto",
-    isolation: "isolate",
-    overflow: "hidden"
+    isolation: "isolate"
   });
 
   layers.forEach((layer, layerIndex) => {
@@ -277,17 +425,24 @@ function createBikeCanvas(
         height: position.height,
         objectFit: "contain",
         zIndex: String(layerIndex + 1),
-        pointerEvents: "none",
-        userSelect: "none"
+        pointerEvents: "none"
       });
 
       if (category === "frame") {
-        image.classList.add("frame-part-image");
-        applyFrameFilter(image, colorsToShow);
+        image.style.opacity = "0";
+
+        colorizeFrameImage(
+          source,
+          colorsToShow,
+          coloredSource => {
+            image.src = coloredSource;
+            image.style.opacity = "1";
+          }
+        );
       }
 
       image.onerror = () => {
-        console.error("Image failed to load:", source);
+        console.error("Image failed:", source);
       };
 
       canvas.appendChild(image);
@@ -295,38 +450,32 @@ function createBikeCanvas(
   });
 
   parent.appendChild(canvas);
-
   return canvas;
 }
 
 /* =========================================
-   UPDATE MAIN PREVIEW
+   MAIN PREVIEW
 ========================================= */
 
 function updatePreview() {
   const preview = document.getElementById("bike-preview");
-
   if (!preview) return;
 
   preview.innerHTML = "";
 
   const title = document.createElement("h2");
   title.textContent = "SUPER73 ZX SE";
+  preview.appendChild(title);
 
   const holder = document.createElement("div");
   holder.className = "preview-canvas-holder";
+  preview.appendChild(holder);
 
-  preview.append(title, holder);
-
-  createBikeCanvas(
-    holder,
-    selectedParts,
-    selectedColors
-  );
+  createBikeCanvas(holder, selectedParts, selectedColors);
 }
 
 /* =========================================
-   LIVE FRAME ADJUSTMENTS
+   FRAME SLIDERS
 ========================================= */
 
 function changeFrameAdjustment() {
@@ -340,21 +489,8 @@ function changeFrameAdjustment() {
   selectedColors.saturation = Number(saturation.value);
   selectedColors.brightness = Number(brightness.value);
 
-  // Change the existing image directly.
-  // No canvas recreation or image reloading.
-
-  const frameImages = document.querySelectorAll(
-    "#bike-preview .frame-part-image"
-  );
-
-  frameImages.forEach(image => {
-    applyFrameFilter(image, selectedColors);
-  });
+  updatePreview();
 }
-
-/* =========================================
-   RESET FRAME ADJUSTMENTS
-========================================= */
 
 function resetFrameAdjustments() {
   selectedColors = {
@@ -363,15 +499,18 @@ function resetFrameAdjustments() {
     brightness: 100
   };
 
+  resetSliderDisplay();
+  updatePreview();
+}
+
+function resetSliderDisplay() {
   const hue = document.getElementById("frame-hue");
   const saturation = document.getElementById("frame-saturation");
   const brightness = document.getElementById("frame-brightness");
 
-  if (hue) hue.value = 0;
-  if (saturation) saturation.value = 100;
-  if (brightness) brightness.value = 100;
-
-  changeFrameAdjustment();
+  if (hue) hue.value = selectedColors.hue;
+  if (saturation) saturation.value = selectedColors.saturation;
+  if (brightness) brightness.value = selectedColors.brightness;
 }
 
 /* =========================================
@@ -403,18 +542,21 @@ function selectCategory(category) {
     option.className = "part-option";
 
     const image = document.createElement("img");
-
     image.src = imagePath(category, filename);
-    image.alt = filename;
+    image.alt = optionNames[category]?.[index] || filename;
 
     image.onerror = () => {
       console.error("Thumbnail failed:", image.src);
     };
 
     const name = document.createElement("span");
-    name.textContent = "Option " + (index + 1);
 
-    option.append(image, name);
+    // DISPLAY CUSTOM NAME INSTEAD OF OPTION NUMBER
+    name.textContent =
+      optionNames[category]?.[index] || `Unlabeled Option ${index + 1}`;
+
+    option.appendChild(image);
+    option.appendChild(name);
 
     const current = selectedParts[category];
 
@@ -422,9 +564,7 @@ function selectCategory(category) {
       ? current.includes(filename)
       : current === filename;
 
-    if (isSelected) {
-      option.classList.add("selected");
-    }
+    if (isSelected) option.classList.add("selected");
 
     option.onclick = () => {
       selectPart(category, filename, index);
@@ -444,9 +584,7 @@ function selectPart(category, filename, index) {
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
-    if (!Array.isArray(current)) {
-      current = [current];
-    }
+    if (!Array.isArray(current)) current = [current];
 
     if (current.includes(filename)) {
       current = current.filter(item => item !== filename);
@@ -515,11 +653,7 @@ function getSavedBikes() {
 
 function storeSavedBikes(bikes) {
   try {
-    localStorage.setItem(
-      "savedBikes",
-      JSON.stringify(bikes)
-    );
-
+    localStorage.setItem("savedBikes", JSON.stringify(bikes));
     return true;
   } catch (error) {
     console.error("Could not save bikes:", error);
@@ -536,9 +670,7 @@ function saveBike() {
   const savedBikes = getSavedBikes();
 
   if (editingBikeId !== null) {
-    const bike = savedBikes.find(
-      item => item.id === editingBikeId
-    );
+    const bike = savedBikes.find(item => item.id === editingBikeId);
 
     if (bike) {
       bike.parts = JSON.parse(JSON.stringify(selectedParts));
@@ -555,7 +687,6 @@ function saveBike() {
   }
 
   const name = prompt("What do you want to name your bike?");
-
   if (!name || !name.trim()) return;
 
   const newBike = {
@@ -577,13 +708,8 @@ function saveBike() {
   alert("Bike saved!");
 }
 
-/* =========================================
-   SAVE AS NEW
-========================================= */
-
 function saveBikeAsNew() {
   const name = prompt("Name your new bike:");
-
   if (!name || !name.trim()) return;
 
   const savedBikes = getSavedBikes();
@@ -612,15 +738,10 @@ function saveBikeAsNew() {
 ========================================= */
 
 function loadBike(id) {
-  const bike = getSavedBikes().find(
-    item => item.id === id
-  );
-
+  const bike = getSavedBikes().find(item => item.id === id);
   if (!bike) return;
 
-  selectedParts = JSON.parse(
-    JSON.stringify(bike.parts || {})
-  );
+  selectedParts = JSON.parse(JSON.stringify(bike.parts || {}));
 
   selectedColors = {
     hue: bike.colors?.hue ?? 0,
@@ -634,26 +755,9 @@ function loadBike(id) {
   updatePreview();
   updateEditingStatus();
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
   alert("Bike loaded! You can now edit it.");
-}
-
-/* =========================================
-   UPDATE SLIDER DISPLAY
-========================================= */
-
-function resetSliderDisplay() {
-  const hue = document.getElementById("frame-hue");
-  const saturation = document.getElementById("frame-saturation");
-  const brightness = document.getElementById("frame-brightness");
-
-  if (hue) hue.value = selectedColors.hue;
-  if (saturation) saturation.value = selectedColors.saturation;
-  if (brightness) brightness.value = selectedColors.brightness;
 }
 
 /* =========================================
@@ -662,15 +766,11 @@ function resetSliderDisplay() {
 
 function renameBike(id) {
   const savedBikes = getSavedBikes();
-
-  const bike = savedBikes.find(
-    item => item.id === id
-  );
+  const bike = savedBikes.find(item => item.id === id);
 
   if (!bike) return;
 
   const newName = prompt("Enter a new name:", bike.name);
-
   if (!newName || !newName.trim()) return;
 
   bike.name = newName.trim();
@@ -686,13 +786,9 @@ function renameBike(id) {
 ========================================= */
 
 function deleteBike(id) {
-  if (!confirm("Are you sure you want to delete this bike?")) {
-    return;
-  }
+  if (!confirm("Are you sure you want to delete this bike?")) return;
 
-  const savedBikes = getSavedBikes().filter(
-    bike => bike.id !== id
-  );
+  const savedBikes = getSavedBikes().filter(bike => bike.id !== id);
 
   if (!storeSavedBikes(savedBikes)) return;
 
@@ -710,7 +806,6 @@ function deleteBike(id) {
 
 function showSavedBikes() {
   const container = document.getElementById("saved-bikes");
-
   if (!container) return;
 
   container.innerHTML = "";
@@ -719,10 +814,7 @@ function showSavedBikes() {
 
   if (!savedBikes.length) {
     const empty = document.createElement("p");
-
-    empty.textContent =
-      "Your garage is empty. Save a bike to get started.";
-
+    empty.textContent = "Your garage is empty. Save a bike to get started.";
     container.appendChild(empty);
     return;
   }
@@ -752,29 +844,20 @@ function showSavedBikes() {
     buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
-    loadButton.type = "button";
     loadButton.textContent = "Load / Edit";
     loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
-    renameButton.type = "button";
     renameButton.textContent = "Rename";
     renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
     deleteButton.onclick = () => deleteBike(bike.id);
 
-    buttons.append(
-      loadButton,
-      renameButton,
-      deleteButton
-    );
-
+    buttons.append(loadButton, renameButton, deleteButton);
     card.append(title, preview, buttons);
-
     container.appendChild(card);
   });
 }
@@ -785,23 +868,17 @@ function showSavedBikes() {
 
 function updateEditingStatus() {
   const status = document.getElementById("editing-status");
-
   if (!status) return;
 
   if (editingBikeId === null) {
-    status.textContent =
-      "Not currently editing a saved bike.";
-
+    status.textContent = "Not currently editing a saved bike.";
     return;
   }
 
-  const bike = getSavedBikes().find(
-    item => item.id === editingBikeId
-  );
+  const bike = getSavedBikes().find(item => item.id === editingBikeId);
 
   status.textContent = bike
-    ? "Editing: " + bike.name +
-      " — Save Bike updates this build."
+    ? "Editing: " + bike.name + " — Save Bike updates this build."
     : "Not currently editing a saved bike.";
 }
 
@@ -810,17 +887,12 @@ function updateEditingStatus() {
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Attach input listeners for immediate slider response.
-
   ["frame-hue", "frame-saturation", "frame-brightness"]
     .forEach(id => {
       const slider = document.getElementById(id);
 
       if (slider) {
-        slider.addEventListener(
-          "input",
-          changeFrameAdjustment
-        );
+        slider.addEventListener("input", changeFrameAdjustment);
       }
     });
 
