@@ -138,7 +138,7 @@ const optionNames = {
     "Purple/Black",
     "Pink/Black"
   ],
-   
+
   battery: [
     "Surron Battery",
     "Stock Battery",
@@ -195,8 +195,8 @@ const layers = [
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
-  { category: "accessories" },
-  { category: "battery" }
+  { category: "battery" },
+  { category: "accessories" }
 ];
 
 function imagePath(category, filename) {
