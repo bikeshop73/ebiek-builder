@@ -1,11 +1,8 @@
 
 /* =========================================
    SUPER73 ZX SE BUILDER
-   COMPLETE REBUILT SCRIPT
-========================================= */
-
-/* =========================================
-   PART IMAGES
+   COMPLETE SCRIPT
+   LIVE ORIGINAL IMAGE COLOR ADJUSTMENTS
 ========================================= */
 
 const parts = {
@@ -55,10 +52,6 @@ const parts = {
   ]
 };
 
-/* =========================================
-   IMAGE FOLDERS
-========================================= */
-
 const folders = {
   frame: "Frames",
   frontForks: "Forks",
@@ -74,17 +67,12 @@ const folders = {
   accessories: "Accessories"
 };
 
-/* =========================================
-   OPTION NAMES
-========================================= */
-
 const optionNames = {
   frame: [
     "White", "Red", "Orange", "Yellow", "Lime",
     "Green", "Blue", "Purple", "Black",
     "Cyan/White", "White/Pink", "Unlabeled Frame 12"
   ],
-
   frontForks: [
     "Silver Inverted",
     "Inverted",
@@ -95,25 +83,20 @@ const optionNames = {
     "Silver Bottom Normal",
     "Bucklos"
   ],
-
   frontWheel: ["Black", "Chrome"],
   rearWheel: ["Black", "Chrome"],
-
   tires: [
     "LZRD Tires",
     "White Wall LZRD Tires",
     "SuperSucker Tires"
   ],
-
   motor: ["1350W", "4,000W"],
-
   handlebars: [
     "Stock",
     "Mountain Bike Bars",
     "Harley Riser",
     "ProTaper"
   ],
-
   seat: [
     "White", "Black", "Red", "Orange", "Yellow",
     "Lime", "Green", "Blue", "Purple", "Brown",
@@ -121,21 +104,17 @@ const optionNames = {
     "Yellow/Black", "Lime/Black", "Blue/Black",
     "Cyan/Black", "Purple/Black", "Pink/Black"
   ],
-
   battery: [
     "Surron Battery",
     "Stock Battery",
     "Chi Battery"
   ],
-
   fenders: [
     "White Plate + Fender",
     "Black Plate + Fender",
     "Motocutz Plate"
   ],
-
   lights: ["Baja"],
-
   accessories: [
     "Pedals",
     "Rear Moto Pegs Silver",
@@ -152,9 +131,9 @@ const optionNames = {
 let selectedParts = {};
 
 let selectedColors = {
-  frameHue: 0,
-  frameSaturation: 100,
-  frameBrightness: 50
+  hue: 0,
+  saturation: 100,
+  brightness: 100
 };
 
 let editingBikeId = null;
@@ -163,10 +142,6 @@ const allowedAccessoryPairs = [
   [0, 1], [0, 3], [1, 2],
   [1, 4], [3, 4], [2, 3]
 ];
-
-/* =========================================
-   LAYER ORDER
-========================================= */
 
 const layers = [
   { category: "tires", position: "rear" },
@@ -184,10 +159,6 @@ const layers = [
   { category: "accessories" }
 ];
 
-/* =========================================
-   IMAGE PATH
-========================================= */
-
 function imagePath(category, filename) {
   return new URL(
     "images/" + folders[category] + "/" + filename,
@@ -196,44 +167,31 @@ function imagePath(category, filename) {
 }
 
 /* =========================================
-   FRAME COLOR
+   FRAME COLOR FILTER
 ========================================= */
 
-function getFrameColor() {
-  return `hsl(
-    ${selectedColors.frameHue},
-    ${selectedColors.frameSaturation}%,
-    ${selectedColors.frameBrightness}%
-  )`;
+function applyFrameFilter(image, colors = selectedColors) {
+  image.style.filter = `
+    hue-rotate(${colors.hue}deg)
+    saturate(${colors.saturation}%)
+    brightness(${colors.brightness}%)
+  `;
 }
 
-function addFrameColorOverlay(canvas, source, position, zIndex) {
-  const overlay = document.createElement("div");
+function updateFrameFilters() {
+  const frameImages = document.querySelectorAll(
+    "#bike-preview .frame-layer, .garage-card .frame-layer"
+  );
 
-  overlay.className = "frame-color-overlay";
+  frameImages.forEach(image => {
+    const colors = image.closest("#bike-preview")
+      ? selectedColors
+      : image.dataset.savedColors
+        ? JSON.parse(image.dataset.savedColors)
+        : selectedColors;
 
-  Object.assign(overlay.style, {
-    position: "absolute",
-    left: position.left,
-    top: position.top,
-    width: position.width,
-    height: position.height,
-    backgroundColor: getFrameColor(),
-    maskImage: `url("${source}")`,
-    webkitMaskImage: `url("${source}")`,
-    maskSize: "contain",
-    webkitMaskSize: "contain",
-    maskPosition: "center",
-    webkitMaskPosition: "center",
-    maskRepeat: "no-repeat",
-    webkitMaskRepeat: "no-repeat",
-    mixBlendMode: "color",
-    opacity: "1",
-    zIndex: String(zIndex),
-    pointerEvents: "none"
+    applyFrameFilter(image, colors);
   });
-
-  canvas.appendChild(overlay);
 }
 
 /* =========================================
@@ -253,6 +211,14 @@ function getLayerPosition(category, position) {
     rearWheel: {
       left: "4%", top: "52%",
       width: "27%", height: "27%"
+    },
+    rearTire: {
+      left: "1%", top: "48%",
+      width: "34%", height: "34%"
+    },
+    frontTire: {
+      left: "66.5%", top: "49%",
+      width: "34%", height: "34%"
     },
     motor: {
       left: "5.5%", top: "52.5%",
@@ -274,14 +240,8 @@ function getLayerPosition(category, position) {
 
   if (category === "tires") {
     return position === "rear"
-      ? {
-          left: "1%", top: "48%",
-          width: "34%", height: "34%"
-        }
-      : {
-          left: "66.5%", top: "49%",
-          width: "34%", height: "34%"
-        };
+      ? positions.rearTire
+      : positions.frontTire;
   }
 
   return positions[category] || {
@@ -351,20 +311,25 @@ function createBikeCanvas(
         pointerEvents: "none"
       });
 
+      if (category === "frame") {
+        image.classList.add("frame-layer");
+
+        image.dataset.savedColors = JSON.stringify(
+          colorsToShow || {
+            hue: 0,
+            saturation: 100,
+            brightness: 100
+          }
+        );
+
+        applyFrameFilter(image, colorsToShow);
+      }
+
       image.onerror = () => {
         console.error("Image failed:", source);
       };
 
       canvas.appendChild(image);
-
-      if (category === "frame") {
-        addFrameColorOverlay(
-          canvas,
-          source,
-          position,
-          layerIndex + 1.5
-        );
-      }
     });
   });
 
@@ -400,101 +365,50 @@ function updatePreview() {
 }
 
 /* =========================================
-   FRAME COLOR SLIDERS
+   LIVE FRAME SLIDERS
 ========================================= */
 
-function changeFrameAdjustment(type, value) {
-  if (!["frameHue", "frameSaturation", "frameBrightness"].includes(type)) {
-    return;
-  }
+function changeFrameAdjustment() {
+  const hue = document.getElementById("frame-hue");
+  const saturation = document.getElementById("frame-saturation");
+  const brightness = document.getElementById("frame-brightness");
 
-  selectedColors[type] = Number(value);
+  if (!hue || !saturation || !brightness) return;
 
-  updatePreview();
-}
+  selectedColors.hue = Number(hue.value);
+  selectedColors.saturation = Number(saturation.value);
+  selectedColors.brightness = Number(brightness.value);
 
-function createColorControls() {
-  const section = document.querySelector(".custom-colors");
-  if (!section) return;
+  // Update existing image directly.
+  // No canvas processing or preview rebuilding.
+  const frameImages = document.querySelectorAll(
+    "#bike-preview .frame-layer"
+  );
 
-  section.innerHTML = `
-    <h2>Frame Color</h2>
-    <p>Adjust your frame's color.</p>
-
-    <div class="hsb-controls">
-
-      <label>
-        Hue
-        <input id="frame-hue" type="range"
-          min="0" max="360" value="0">
-      </label>
-
-      <label>
-        Saturation
-        <input id="frame-saturation" type="range"
-          min="0" max="100" value="100">
-      </label>
-
-      <label>
-        Brightness
-        <input id="frame-brightness" type="range"
-          min="0" max="100" value="50">
-      </label>
-
-    </div>
-
-    <button type="button" id="reset-frame-color">
-      Reset Frame Color
-    </button>
-  `;
-
-  const controls = [
-    ["frame-hue", "frameHue"],
-    ["frame-saturation", "frameSaturation"],
-    ["frame-brightness", "frameBrightness"]
-  ];
-
-  controls.forEach(([id, property]) => {
-    const input = document.getElementById(id);
-
-    if (!input) return;
-
-    input.addEventListener("input", () => {
-      changeFrameAdjustment(property, input.value);
-    });
-  });
-
-  document.getElementById("reset-frame-color")
-    .addEventListener("click", resetColors);
-
-  updateColorInputs();
-}
-
-function updateColorInputs() {
-  const controls = [
-    ["frame-hue", "frameHue"],
-    ["frame-saturation", "frameSaturation"],
-    ["frame-brightness", "frameBrightness"]
-  ];
-
-  controls.forEach(([id, property]) => {
-    const input = document.getElementById(id);
-
-    if (input) {
-      input.value = selectedColors[property];
-    }
+  frameImages.forEach(image => {
+    applyFrameFilter(image, selectedColors);
   });
 }
 
-function resetColors() {
+function resetFrameAdjustments() {
   selectedColors = {
-    frameHue: 0,
-    frameSaturation: 100,
-    frameBrightness: 50
+    hue: 0,
+    saturation: 100,
+    brightness: 100
   };
 
-  updateColorInputs();
-  updatePreview();
+  resetSliderDisplay();
+  changeFrameAdjustment();
+}
+
+function resetSliderDisplay() {
+  const hue = document.getElementById("frame-hue");
+  const saturation = document.getElementById("frame-saturation");
+  const brightness = document.getElementById("frame-brightness");
+
+  if (hue) hue.value = selectedColors.hue;
+  if (saturation) saturation.value = selectedColors.saturation;
+  if (brightness) brightness.value = selectedColors.brightness;
 }
 
 /* =========================================
@@ -529,10 +443,6 @@ function selectCategory(category) {
     image.src = imagePath(category, filename);
     image.alt = optionNames[category]?.[index] || filename;
 
-    image.onerror = () => {
-      console.error("Thumbnail failed:", image.src);
-    };
-
     const name = document.createElement("span");
     name.textContent =
       optionNames[category]?.[index] ||
@@ -550,9 +460,9 @@ function selectCategory(category) {
       option.classList.add("selected");
     }
 
-    option.addEventListener("click", () => {
+    option.onclick = () => {
       selectPart(category, filename, index);
-    });
+    };
 
     options.appendChild(option);
   });
@@ -568,17 +478,13 @@ function selectPart(category, filename, index) {
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
-    if (!Array.isArray(current)) {
-      current = [current];
-    }
+    if (!Array.isArray(current)) current = [current];
 
     if (current.includes(filename)) {
       current = current.filter(item => item !== filename);
     } else {
       if (current.length >= 2) {
-        alert(category === "battery"
-          ? "You can only select two batteries."
-          : "You can only select two accessories.");
+        alert("You can only select two.");
         return;
       }
 
@@ -596,7 +502,7 @@ function selectPart(category, filename, index) {
           );
 
           if (!allowed) {
-            alert("Those two accessories cannot be combined.");
+            alert("Those accessories cannot be combined.");
             return;
           }
         }
@@ -634,7 +540,7 @@ function getSavedBikes() {
 
     return Array.isArray(saved) ? saved : [];
   } catch (error) {
-    console.error("Garage loading error:", error);
+    console.error("Could not load bikes:", error);
     return [];
   }
 }
@@ -644,8 +550,8 @@ function storeSavedBikes(bikes) {
     localStorage.setItem("savedBikes", JSON.stringify(bikes));
     return true;
   } catch (error) {
-    console.error("Garage saving error:", error);
-    alert("Could not save bike. Check browser storage.");
+    console.error("Could not save bikes:", error);
+    alert("Could not save. Browser storage may be full.");
     return false;
   }
 }
@@ -663,7 +569,7 @@ function saveBike() {
     );
 
     if (bike) {
-      bike.parts = structuredClone(selectedParts);
+      bike.parts = JSON.parse(JSON.stringify(selectedParts));
       bike.colors = { ...selectedColors };
 
       if (!storeSavedBikes(savedBikes)) return;
@@ -682,7 +588,7 @@ function saveBike() {
   const newBike = {
     id: Date.now(),
     name: name.trim(),
-    parts: structuredClone(selectedParts),
+    parts: JSON.parse(JSON.stringify(selectedParts)),
     colors: { ...selectedColors }
   };
 
@@ -692,15 +598,11 @@ function saveBike() {
 
   editingBikeId = newBike.id;
 
-  showSavedBikes();
   updateEditingStatus();
+  showSavedBikes();
 
   alert("Bike saved!");
 }
-
-/* =========================================
-   SAVE AS NEW
-========================================= */
 
 function saveBikeAsNew() {
   const name = prompt("Name your new bike:");
@@ -711,7 +613,7 @@ function saveBikeAsNew() {
   const newBike = {
     id: Date.now(),
     name: name.trim(),
-    parts: structuredClone(selectedParts),
+    parts: JSON.parse(JSON.stringify(selectedParts)),
     colors: { ...selectedColors }
   };
 
@@ -721,8 +623,8 @@ function saveBikeAsNew() {
 
   editingBikeId = newBike.id;
 
-  showSavedBikes();
   updateEditingStatus();
+  showSavedBikes();
 
   alert("New bike saved!");
 }
@@ -735,17 +637,17 @@ function loadBike(id) {
   const bike = getSavedBikes().find(item => item.id === id);
   if (!bike) return;
 
-  selectedParts = structuredClone(bike.parts || {});
+  selectedParts = JSON.parse(JSON.stringify(bike.parts || {}));
 
   selectedColors = {
-    frameHue: bike.colors?.frameHue ?? bike.colors?.hue ?? 0,
-    frameSaturation: bike.colors?.frameSaturation ?? bike.colors?.saturation ?? 100,
-    frameBrightness: bike.colors?.frameBrightness ?? bike.colors?.brightness ?? 50
+    hue: bike.colors?.hue ?? 0,
+    saturation: bike.colors?.saturation ?? 100,
+    brightness: bike.colors?.brightness ?? 100
   };
 
   editingBikeId = bike.id;
 
-  updateColorInputs();
+  resetSliderDisplay();
   updatePreview();
   updateEditingStatus();
 
@@ -834,9 +736,9 @@ function showSavedBikes() {
       preview,
       bike.parts || {},
       bike.colors || {
-        frameHue: 0,
-        frameSaturation: 100,
-        frameBrightness: 50
+        hue: 0,
+        saturation: 100,
+        brightness: 100
       },
       true
     );
@@ -845,20 +747,17 @@ function showSavedBikes() {
     buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
-    loadButton.type = "button";
     loadButton.textContent = "Load / Edit";
-    loadButton.addEventListener("click", () => loadBike(bike.id));
+    loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
-    renameButton.type = "button";
     renameButton.textContent = "Rename";
-    renameButton.addEventListener("click", () => renameBike(bike.id));
+    renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
-    deleteButton.addEventListener("click", () => deleteBike(bike.id));
+    deleteButton.onclick = () => deleteBike(bike.id);
 
     buttons.append(loadButton, renameButton, deleteButton);
 
@@ -885,7 +784,7 @@ function updateEditingStatus() {
   );
 
   status.textContent = bike
-    ? `Editing: ${bike.name} — Save Bike updates this build.`
+    ? "Editing: " + bike.name + " — Save Bike updates this build."
     : "Not currently editing a saved bike.";
 }
 
@@ -894,7 +793,18 @@ function updateEditingStatus() {
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  createColorControls();
+  ["frame-hue", "frame-saturation", "frame-brightness"]
+    .forEach(id => {
+      const slider = document.getElementById(id);
+
+      if (slider) {
+        slider.addEventListener(
+          "input",
+          changeFrameAdjustment
+        );
+      }
+    });
+
   updatePreview();
   showSavedBikes();
   updateEditingStatus();
