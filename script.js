@@ -42,7 +42,7 @@ const parts = {
     "IMG_6019.PNG", "IMG_6020.PNG", "IMG_6021.PNG",
     "IMG_6022.PNG", "IMG_6023.PNG"
   ],
-  battery: ["IMG_5984.PNG", "IMG_5985.PNG", "IMG_5988.PNG"],
+  battery: ["IMG_5984.PNG", "IMG_5985.PNG", "IMG_5988.PNG", "IMG_7000.PNG"],
   fenders: ["IMG_5989.PNG", "IMG_5990.PNG", "IMG_5991.PNG"],
   lights: ["IMG_5992.PNG"],
   accessories: [
@@ -125,7 +125,8 @@ const optionNames = {
   battery: [
     "60V Surron LBX Battery",
     "Stock Battery",
-    "81V Chi Battery"
+    "81V Chi Battery",
+    "60V Handleworks Battery"
   ],
 
   fenders: [
