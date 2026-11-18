@@ -203,7 +203,49 @@ function imagePath(category, filename) {
    FRAME COLOR PROCESSING
 ========================================= */
 
+
+/* =========================================
+   FRAME COLOR PROCESSING
+   PRESERVES ORIGINAL FRAME COLORS + SHADING
+========================================= */
+
 const frameImageCache = new Map();
+
+function rgbToHsl(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1));
+
+    switch (max) {
+      case r:
+        h = 60 * (((g - b) / delta) % 6);
+        break;
+      case g:
+        h = 60 * ((b - r) / delta + 2);
+        break;
+      case b:
+        h = 60 * ((r - g) / delta + 4);
+        break;
+    }
+  }
+
+  return [
+    (h + 360) % 360,
+    s * 100,
+    l * 100
+  ];
+}
 
 function hslToRgb(h, s, l) {
   h = ((h % 360) + 360) % 360;
@@ -248,44 +290,61 @@ function colorizeFrameImage(source, colors, callback) {
   image.onload = () => {
     try {
       const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+
       const context = canvas.getContext("2d", {
         willReadFrequently: true
       });
 
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-
       context.drawImage(image, 0, 0);
 
       const imageData = context.getImageData(
-        0, 0, canvas.width, canvas.height
+        0, 0,
+        canvas.width,
+        canvas.height
       );
 
       const pixels = imageData.data;
 
-      const target = hslToRgb(
-        colors.hue,
-        colors.saturation,
-        50
-      );
+      const hueShift = Number(colors.hue) || 0;
+      const saturationMultiplier =
+        (Number(colors.saturation) || 0) / 100;
 
-      const brightness = colors.brightness / 100;
+      const brightnessMultiplier =
+        (Number(colors.brightness) || 0) / 100;
 
       for (let i = 0; i < pixels.length; i += 4) {
         if (pixels[i + 3] === 0) continue;
 
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
+        const [originalHue, originalSat, originalLight] =
+          rgbToHsl(
+            pixels[i],
+            pixels[i + 1],
+            pixels[i + 2]
+          );
 
-        const luminance =
-          (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        const newHue = (originalHue + hueShift + 360) % 360;
 
-        const shade = (0.22 + luminance * 0.78) * brightness;
+        const newSaturation = Math.max(
+          0,
+          Math.min(100, originalSat * saturationMultiplier)
+        );
 
-        pixels[i] = Math.min(255, target[0] * shade);
-        pixels[i + 1] = Math.min(255, target[1] * shade);
-        pixels[i + 2] = Math.min(255, target[2] * shade);
+        const newLightness = Math.max(
+          0,
+          Math.min(100, originalLight * brightnessMultiplier)
+        );
+
+        const rgb = hslToRgb(
+          newHue,
+          newSaturation,
+          newLightness
+        );
+
+        pixels[i] = rgb[0];
+        pixels[i + 1] = rgb[1];
+        pixels[i + 2] = rgb[2];
       }
 
       context.putImageData(imageData, 0, 0);
@@ -293,21 +352,23 @@ function colorizeFrameImage(source, colors, callback) {
       const result = canvas.toDataURL("image/png");
 
       frameImageCache.set(key, result);
+
       callback(result);
 
     } catch (error) {
-      console.error("Frame coloring failed:", error);
+      console.error("Frame color processing failed:", error);
       callback(source);
     }
   };
 
   image.onerror = () => {
-    console.error("Could not load frame image:", source);
+    console.error("Could not load frame:", source);
     callback(source);
   };
 
   image.src = source;
 }
+
 
 /* =========================================
    PART POSITIONING
