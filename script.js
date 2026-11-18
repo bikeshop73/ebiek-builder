@@ -524,17 +524,8 @@ function createBikeCanvas(
       });
 
       if (category === "frame") {
-        image.style.opacity = "0";
-
-        colorizeFrameImage(
-          source,
-          colorsToShow,
-          coloredSource => {
-            image.src = coloredSource;
-            image.style.opacity = "1";
-          }
-        );
-      }
+  image.style.filter = getFrameFilter(colorsToShow);
+}
 
       image.onerror = () => {
         console.error("Image failed:", source);
