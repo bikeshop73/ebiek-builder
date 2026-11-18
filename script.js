@@ -122,8 +122,8 @@ const layers = [
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
-  { category: "battery" },
-  { category: "accessories" }
+  { category: "accessories" },
+  { category: "battery" }
 ];
 
 /* =========================================
