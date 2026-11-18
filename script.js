@@ -123,9 +123,9 @@ const optionNames = {
   ],
 
   battery: [
-    "Surron Battery",
+    "60V Surron LBX Battery",
     "Stock Battery",
-    "Chi Battery"
+    "81V Chi Battery"
   ],
 
   fenders: [
