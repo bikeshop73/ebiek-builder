@@ -461,6 +461,13 @@ function getLayerPosition(category, position) {
       width: "24%",
       height: "24%"
     },
+     
+    brakes: {
+      left: "0%",
+      top: "0%",
+      width: "120%",
+      height: "120%"
+    },
 
     fenders: {
       left: "57.5%",
