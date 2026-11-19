@@ -1,12 +1,12 @@
 
 /* =========================================
    SUPER73 ZX SE BUILDER
-   COMPLETE SCRIPT + PERFORMANCE DATABASE
-   BRAKES + CHAIN ADDED
+   COMPLETE SCRIPT
+   BRAKES + CHAIN
 ========================================= */
 
 /* =========================================
-   PARTS
+   PARTS DATABASE
 ========================================= */
 
 const parts = {
@@ -138,7 +138,6 @@ const optionNames = {
   ],
 
   frontWheel: ["Black", "Chrome"],
-
   rearWheel: ["Black", "Chrome"],
 
   tires: [
@@ -193,9 +192,7 @@ const optionNames = {
     "Magura Brakes"
   ],
 
-  chain: [
-    "Chain"
-  ],
+  chain: ["Chain"],
 
   controller: [
     "Stock",
@@ -295,6 +292,7 @@ const allowedAccessoryPairs = [
 ========================================= */
 
 const layers = [
+  { category: "battery" },
   { category: "tires", position: "rear" },
   { category: "tires", position: "front" },
   { category: "rearWheel" },
@@ -308,7 +306,6 @@ const layers = [
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
-  { category: "battery" },
   { category: "accessories" }
 ];
 
@@ -327,23 +324,19 @@ function getPerformanceStats(partsToCheck) {
 
   const batterySelection = partsToCheck.battery;
 
-  if (!batterySelection) return zeroStats;
-
-  if (!Array.isArray(batterySelection)) {
-    return zeroStats;
-  }
-
-  if (batterySelection.length !== 1) {
+  if (
+    !Array.isArray(batterySelection) ||
+    batterySelection.length !== 1
+  ) {
     return zeroStats;
   }
 
   const motorFilename = partsToCheck.motor;
-
-  if (!motorFilename) return zeroStats;
-
   const controller = partsToCheck.controller;
 
-  if (!controller) return zeroStats;
+  if (!motorFilename || !controller) {
+    return zeroStats;
+  }
 
   const batteryNames = {
     "IMG_5984.PNG": "Surron",
@@ -364,9 +357,8 @@ function getPerformanceStats(partsToCheck) {
     return zeroStats;
   }
 
-  const combinationKey = batteryName + "|" + motorName;
-
-  const combination = performanceDatabase[combinationKey];
+  const combination =
+    performanceDatabase[batteryName + "|" + motorName];
 
   if (!combination || !combination[controller]) {
     return zeroStats;
@@ -564,7 +556,6 @@ function createBikeCanvas(
         maxWidth: "none"
       });
 
-      // Only frame images receive frame color adjustments.
       if (category === "frame") {
         image.style.filter = getFrameFilter(colorsToShow);
       }
@@ -595,13 +586,11 @@ function updatePreview() {
   preview.innerHTML = "";
 
   const title = document.createElement("h2");
-
   title.textContent = "SUPER73 ZX SE";
 
   preview.appendChild(title);
 
   const holder = document.createElement("div");
-
   holder.className = "preview-canvas-holder";
 
   preview.appendChild(holder);
@@ -695,8 +684,6 @@ function selectCategory(category) {
 
   container.innerHTML = "";
 
-  const heading = document.createElement("h3");
-
   const headingNames = {
     fenders: "Fenders + Plates",
     frontForks: "Front Forks",
@@ -705,6 +692,8 @@ function selectCategory(category) {
     chain: "Chain"
   };
 
+  const heading = document.createElement("h3");
+
   heading.textContent =
     headingNames[category] ||
     category.replace(/([A-Z])/g, " $1");
@@ -712,7 +701,6 @@ function selectCategory(category) {
   container.appendChild(heading);
 
   const options = document.createElement("div");
-
   options.className = "part-options";
 
   parts[category].forEach((filename, index) => {
@@ -721,14 +709,11 @@ function selectCategory(category) {
     option.type = "button";
     option.className = "part-option";
 
-    // Controller options are text-only.
     if (category !== "controller") {
       const image = document.createElement("img");
 
       image.src = imagePath(category, filename);
-
-      image.alt =
-        optionNames[category]?.[index] || filename;
+      image.alt = optionNames[category]?.[index] || filename;
 
       image.onerror = () => {
         console.error("Thumbnail failed:", image.src);
@@ -772,7 +757,7 @@ function selectCategory(category) {
 
 function selectPart(category, filename, index) {
 
-  // Controller: one selection.
+  // Controller: single selection.
   if (category === "controller") {
     if (selectedParts.controller === filename) {
       delete selectedParts.controller;
@@ -787,7 +772,7 @@ function selectPart(category, filename, index) {
     return;
   }
 
-  // Batteries and accessories can have two selections.
+  // Batteries and accessories: up to two selections.
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
@@ -835,7 +820,7 @@ function selectPart(category, filename, index) {
     }
 
   } else {
-    // All other categories: one selection.
+    // Brakes, chain, wheels, frame, etc.: single selection.
     if (selectedParts[category] === filename) {
       delete selectedParts[category];
     } else {
@@ -927,7 +912,6 @@ function saveBike() {
       );
 
       bike.colors = { ...selectedColors };
-
       bike.performance = getPerformanceStats(selectedParts);
 
       if (!storeSavedBikes(savedBikes)) return;
@@ -1099,17 +1083,32 @@ function showSavedBikes() {
     return;
   }
 
+  const batteryLabels = {
+    "IMG_5984.PNG": "60V Surron LBX Battery",
+    "IMG_5985.PNG": "Stock Battery",
+    "IMG_5988.PNG": "81V Chi Battery",
+    "IMG_7000.PNG": "60V Handleworks Battery"
+  };
+
+  const motorLabels = {
+    "IMG_5959.PNG": "1350W",
+    "IMG_5993.PNG": "4,000W"
+  };
+
+  const brakeLabels = {
+    "IMG_6057.PNG": "Stock Tektro",
+    "IMG_6058.PNG": "UB Brakes",
+    "IMG_6060.PNG": "Magura Brakes"
+  };
+
   savedBikes.forEach(bike => {
     const card = document.createElement("div");
-
     card.className = "garage-card";
 
     const title = document.createElement("h3");
-
     title.textContent = bike.name;
 
     const preview = document.createElement("div");
-
     preview.className = "garage-bike-preview";
 
     createBikeCanvas(
@@ -1123,13 +1122,12 @@ function showSavedBikes() {
       true
     );
 
-    // Performance.
     const stats = getPerformanceStats(bike.parts || {});
 
     bike.performance = stats;
 
+    // PERFORMANCE DISPLAY.
     const performance = document.createElement("div");
-
     performance.className = "bike-performance";
 
     Object.assign(performance.style, {
@@ -1146,7 +1144,6 @@ function showSavedBikes() {
     });
 
     const speed = document.createElement("div");
-
     const speedLabel = document.createElement("div");
 
     speedLabel.textContent = "TOP SPEED";
@@ -1154,14 +1151,12 @@ function showSavedBikes() {
     speedLabel.style.opacity = "0.7";
 
     const speedValue = document.createElement("strong");
-
     speedValue.textContent = stats.topSpeed + " MPH";
     speedValue.style.fontSize = "20px";
 
     speed.append(speedLabel, speedValue);
 
     const power = document.createElement("div");
-
     const powerLabel = document.createElement("div");
 
     powerLabel.textContent = "WATTAGE";
@@ -1181,33 +1176,16 @@ function showSavedBikes() {
 
     // COMPONENT INFORMATION.
     const components = document.createElement("div");
-
     components.className = "bike-components";
 
     const componentNames = document.createElement("p");
 
-    const batteryLabels = {
-      "IMG_5984.PNG": "60V Surron LBX Battery",
-      "IMG_5985.PNG": "Stock Battery",
-      "IMG_5988.PNG": "81V Chi Battery",
-      "IMG_7000.PNG": "60V Handleworks Battery"
-    };
-
-    const motorLabels = {
-      "IMG_5959.PNG": "1350W",
-      "IMG_5993.PNG": "4,000W"
-    };
-
-    const brakeLabels = {
-      "IMG_6057.PNG": "Stock Tektro",
-      "IMG_6058.PNG": "UB Brakes",
-      "IMG_6060.PNG": "Magura Brakes"
-    };
-
     const batterySelection = bike.parts?.battery;
 
     const batteryText = Array.isArray(batterySelection)
-      ? batterySelection.map(item => batteryLabels[item] || item).join(" + ")
+      ? batterySelection
+          .map(item => batteryLabels[item] || item)
+          .join(" + ")
       : "None";
 
     const motorText =
@@ -1233,21 +1211,17 @@ function showSavedBikes() {
 
     // GARAGE BUTTONS.
     const buttons = document.createElement("div");
-
     buttons.className = "garage-buttons";
 
     const loadButton = document.createElement("button");
-
     loadButton.textContent = "Load / Edit";
     loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
-
     renameButton.textContent = "Rename";
     renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
-
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-button";
     deleteButton.onclick = () => deleteBike(bike.id);
@@ -1304,12 +1278,11 @@ function updateEditingStatus() {
    INITIALIZATION
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+function initializeBuilder() {
+  console.log("Initializing SUPER73 ZX SE Builder...");
 
-  // Controller category.
   addControllerButton();
 
-  // Frame adjustment sliders.
   [
     "frame-hue",
     "frame-saturation",
@@ -1326,12 +1299,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   updatePreview();
-
   showSavedBikes();
-
   updateEditingStatus();
 
   console.log(
     "SUPER73 ZX SE Builder loaded successfully with brakes and chain."
   );
-});
+}
+
+// Works whether the script loads before or after the page DOM.
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeBuilder,
+    { once: true }
+  );
+} else {
+  initializeBuilder();
+}
