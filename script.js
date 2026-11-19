@@ -292,6 +292,7 @@ const allowedAccessoryPairs = [
 ========================================= */
 
 const layers = [
+  { category: "brakes" },
   { category: "battery" },
   { category: "tires", position: "rear" },
   { category: "tires", position: "front" },
@@ -302,7 +303,6 @@ const layers = [
   { category: "frontForks" },
   { category: "fenders" },
   { category: "lights" },
-  { category: "brakes" },
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
