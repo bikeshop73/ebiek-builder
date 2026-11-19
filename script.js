@@ -2,6 +2,7 @@
 /* =========================================
    SUPER73 ZX SE BUILDER
    COMPLETE SCRIPT + PERFORMANCE DATABASE
+   BRAKES + CHAIN ADDED
 ========================================= */
 
 /* =========================================
@@ -62,13 +63,25 @@ const parts = {
     "IMG_7000.PNG"
   ],
 
-  fenders: ["IMG_5989.PNG", "IMG_5990.PNG", "IMG_5991.PNG"],
+  fenders: [
+    "IMG_5989.PNG", "IMG_5990.PNG", "IMG_5991.PNG"
+  ],
 
   lights: ["IMG_5992.PNG"],
 
   accessories: [
     "IMG_6030.PNG", "IMG_6031.PNG", "IMG_6032.PNG",
     "IMG_6033.PNG", "IMG_6034.PNG"
+  ],
+
+  brakes: [
+    "IMG_6057.PNG",
+    "IMG_6058.PNG",
+    "IMG_6060.PNG"
+  ],
+
+  chain: [
+    "IMG_6061.PNG"
   ],
 
   controller: [
@@ -78,6 +91,7 @@ const parts = {
     "FarDriver"
   ]
 };
+
 
 /* =========================================
    IMAGE FOLDERS
@@ -95,8 +109,11 @@ const folders = {
   battery: "Batteries",
   fenders: "Fenders",
   lights: "Lights",
-  accessories: "Accessories"
+  accessories: "Accessories",
+  brakes: "Brakes",
+  chain: "Chain"
 };
+
 
 /* =========================================
    OPTION NAMES
@@ -170,6 +187,16 @@ const optionNames = {
     "Black Peg Swap"
   ],
 
+  brakes: [
+    "Stock Tektro",
+    "UB Brakes",
+    "Magura Brakes"
+  ],
+
+  chain: [
+    "Chain"
+  ],
+
   controller: [
     "Stock",
     "BAC855",
@@ -177,6 +204,7 @@ const optionNames = {
     "FarDriver"
   ]
 };
+
 
 /* =========================================
    PERFORMANCE DATABASE
@@ -241,6 +269,7 @@ const performanceDatabase = {
   }
 };
 
+
 /* =========================================
    CURRENT BUILD
 ========================================= */
@@ -260,6 +289,7 @@ const allowedAccessoryPairs = [
   [1, 4], [3, 4], [2, 3]
 ];
 
+
 /* =========================================
    BIKE IMAGE LAYERS
 ========================================= */
@@ -270,15 +300,18 @@ const layers = [
   { category: "rearWheel" },
   { category: "frontWheel" },
   { category: "motor" },
+  { category: "chain" },
   { category: "frontForks" },
   { category: "fenders" },
   { category: "lights" },
+  { category: "brakes" },
   { category: "handlebars" },
   { category: "seat" },
   { category: "frame" },
   { category: "battery" },
   { category: "accessories" }
 ];
+
 
 /* =========================================
    PERFORMANCE CALCULATOR
@@ -294,7 +327,6 @@ function getPerformanceStats(partsToCheck) {
 
   const batterySelection = partsToCheck.battery;
 
-  // Exactly one battery is required.
   if (!batterySelection) return zeroStats;
 
   if (!Array.isArray(batterySelection)) {
@@ -313,7 +345,6 @@ function getPerformanceStats(partsToCheck) {
 
   if (!controller) return zeroStats;
 
-  // Battery filename -> database name.
   const batteryNames = {
     "IMG_5984.PNG": "Surron",
     "IMG_5985.PNG": "Stock",
@@ -321,7 +352,6 @@ function getPerformanceStats(partsToCheck) {
     "IMG_7000.PNG": "Handleworks"
   };
 
-  // Motor filename -> database name.
   const motorNames = {
     "IMG_5959.PNG": "1350W",
     "IMG_5993.PNG": "4000W"
@@ -350,11 +380,17 @@ function getPerformanceStats(partsToCheck) {
   };
 }
 
+
 /* =========================================
    IMAGE PATH
 ========================================= */
 
 function imagePath(category, filename) {
+  if (!folders[category]) {
+    console.error("Missing image folder:", category);
+    return "";
+  }
+
   return new URL(
     "images/" + folders[category] + "/" + filename,
     document.baseURI
@@ -363,7 +399,7 @@ function imagePath(category, filename) {
 
 
 /* =========================================
-   FRAME COLOR PROCESSING - FIXED
+   FRAME COLOR PROCESSING
 ========================================= */
 
 function getFrameFilter(colors) {
@@ -463,6 +499,7 @@ function getLayerPosition(category, position) {
   };
 }
 
+
 /* =========================================
    CREATE BIKE CANVAS
 ========================================= */
@@ -485,7 +522,8 @@ function createBikeCanvas(
     maxWidth: thumbnail ? "260px" : "700px",
     aspectRatio: "1 / 1",
     margin: "auto",
-    isolation: "isolate"
+    isolation: "isolate",
+    overflow: "hidden"
   });
 
   layers.forEach((layer, layerIndex) => {
@@ -500,6 +538,8 @@ function createBikeCanvas(
 
     filenames.forEach(filename => {
       const source = imagePath(category, filename);
+
+      if (!source) return;
 
       const position = getLayerPosition(
         category,
@@ -520,12 +560,14 @@ function createBikeCanvas(
         height: position.height,
         objectFit: "contain",
         zIndex: String(layerIndex + 1),
-        pointerEvents: "none"
+        pointerEvents: "none",
+        maxWidth: "none"
       });
 
+      // Only frame images receive frame color adjustments.
       if (category === "frame") {
-  image.style.filter = getFrameFilter(colorsToShow);
-}
+        image.style.filter = getFrameFilter(colorsToShow);
+      }
 
       image.onerror = () => {
         console.error("Image failed:", source);
@@ -540,6 +582,7 @@ function createBikeCanvas(
   return canvas;
 }
 
+
 /* =========================================
    MAIN PREVIEW
 ========================================= */
@@ -552,11 +595,13 @@ function updatePreview() {
   preview.innerHTML = "";
 
   const title = document.createElement("h2");
+
   title.textContent = "SUPER73 ZX SE";
 
   preview.appendChild(title);
 
   const holder = document.createElement("div");
+
   holder.className = "preview-canvas-holder";
 
   preview.appendChild(holder);
@@ -567,6 +612,7 @@ function updatePreview() {
     selectedColors
   );
 }
+
 
 /* =========================================
    FRAME SLIDERS
@@ -607,6 +653,7 @@ function resetSliderDisplay() {
   if (brightness) brightness.value = selectedColors.brightness;
 }
 
+
 /* =========================================
    CONTROLLER CATEGORY BUTTON
 ========================================= */
@@ -636,6 +683,7 @@ function addControllerButton() {
   categories.appendChild(button);
 }
 
+
 /* =========================================
    CATEGORY SELECTION
 ========================================= */
@@ -649,15 +697,22 @@ function selectCategory(category) {
 
   const heading = document.createElement("h3");
 
+  const headingNames = {
+    fenders: "Fenders + Plates",
+    frontForks: "Front Forks",
+    controller: "Controller",
+    brakes: "Brakes",
+    chain: "Chain"
+  };
+
   heading.textContent =
-    category === "fenders" ? "Fenders + Plates" :
-    category === "frontForks" ? "Front Forks" :
-    category === "controller" ? "Controller" :
+    headingNames[category] ||
     category.replace(/([A-Z])/g, " $1");
 
   container.appendChild(heading);
 
   const options = document.createElement("div");
+
   options.className = "part-options";
 
   parts[category].forEach((filename, index) => {
@@ -710,13 +765,14 @@ function selectCategory(category) {
   container.appendChild(options);
 }
 
+
 /* =========================================
    SELECT PART
 ========================================= */
 
 function selectPart(category, filename, index) {
 
-  // Controller: one selection, no image.
+  // Controller: one selection.
   if (category === "controller") {
     if (selectedParts.controller === filename) {
       delete selectedParts.controller;
@@ -779,6 +835,7 @@ function selectPart(category, filename, index) {
     }
 
   } else {
+    // All other categories: one selection.
     if (selectedParts[category] === filename) {
       delete selectedParts[category];
     } else {
@@ -790,6 +847,7 @@ function selectPart(category, filename, index) {
   selectCategory(category);
   updateEditingStatus();
 }
+
 
 /* =========================================
    GARAGE STORAGE
@@ -827,6 +885,7 @@ function storeSavedBikes(bikes) {
   }
 }
 
+
 /* =========================================
    CREATE SAVED BIKE DATA
 ========================================= */
@@ -848,6 +907,7 @@ function createBikeData(name) {
     }
   };
 }
+
 
 /* =========================================
    SAVE BIKE
@@ -899,6 +959,7 @@ function saveBike() {
   alert("Bike saved!");
 }
 
+
 /* =========================================
    SAVE AS NEW
 ========================================= */
@@ -923,6 +984,7 @@ function saveBikeAsNew() {
 
   alert("New bike saved!");
 }
+
 
 /* =========================================
    LOAD BIKE
@@ -959,6 +1021,7 @@ function loadBike(id) {
   alert("Bike loaded! You can now edit it.");
 }
 
+
 /* =========================================
    RENAME BIKE
 ========================================= */
@@ -987,6 +1050,7 @@ function renameBike(id) {
   updateEditingStatus();
 }
 
+
 /* =========================================
    DELETE BIKE
 ========================================= */
@@ -1009,6 +1073,7 @@ function deleteBike(id) {
 
   showSavedBikes();
 }
+
 
 /* =========================================
    MY GARAGE
@@ -1058,13 +1123,11 @@ function showSavedBikes() {
       true
     );
 
-    // Calculate performance using the actual saved parts.
-    // This also updates older saved bikes automatically.
+    // Performance.
     const stats = getPerformanceStats(bike.parts || {});
 
     bike.performance = stats;
 
-    // PERFORMANCE DISPLAY
     const performance = document.createElement("div");
 
     performance.className = "bike-performance";
@@ -1087,14 +1150,12 @@ function showSavedBikes() {
     const speedLabel = document.createElement("div");
 
     speedLabel.textContent = "TOP SPEED";
-
     speedLabel.style.fontSize = "11px";
     speedLabel.style.opacity = "0.7";
 
     const speedValue = document.createElement("strong");
 
     speedValue.textContent = stats.topSpeed + " MPH";
-
     speedValue.style.fontSize = "20px";
 
     speed.append(speedLabel, speedValue);
@@ -1104,7 +1165,6 @@ function showSavedBikes() {
     const powerLabel = document.createElement("div");
 
     powerLabel.textContent = "WATTAGE";
-
     powerLabel.style.fontSize = "11px";
     powerLabel.style.opacity = "0.7";
 
@@ -1119,7 +1179,7 @@ function showSavedBikes() {
 
     performance.append(speed, power);
 
-    // SELECTED COMPONENT INFORMATION
+    // COMPONENT INFORMATION.
     const components = document.createElement("div");
 
     components.className = "bike-components";
@@ -1138,24 +1198,40 @@ function showSavedBikes() {
       "IMG_5993.PNG": "4,000W"
     };
 
+    const brakeLabels = {
+      "IMG_6057.PNG": "Stock Tektro",
+      "IMG_6058.PNG": "UB Brakes",
+      "IMG_6060.PNG": "Magura Brakes"
+    };
+
     const batterySelection = bike.parts?.battery;
 
     const batteryText = Array.isArray(batterySelection)
       ? batterySelection.map(item => batteryLabels[item] || item).join(" + ")
       : "None";
 
-    const motorText = motorLabels[bike.parts?.motor] || "None";
+    const motorText =
+      motorLabels[bike.parts?.motor] || "None";
 
-    const controllerText = bike.parts?.controller || "None";
+    const controllerText =
+      bike.parts?.controller || "None";
+
+    const brakeText =
+      brakeLabels[bike.parts?.brakes] || "None";
+
+    const chainText =
+      bike.parts?.chain ? "Chain" : "None";
 
     componentNames.textContent =
       "Battery: " + batteryText +
       " | Motor: " + motorText +
-      " | Controller: " + controllerText;
+      " | Controller: " + controllerText +
+      " | Brakes: " + brakeText +
+      " | Chain: " + chainText;
 
     components.appendChild(componentNames);
 
-    // GARAGE BUTTONS
+    // GARAGE BUTTONS.
     const buttons = document.createElement("div");
 
     buttons.className = "garage-buttons";
@@ -1163,21 +1239,17 @@ function showSavedBikes() {
     const loadButton = document.createElement("button");
 
     loadButton.textContent = "Load / Edit";
-
     loadButton.onclick = () => loadBike(bike.id);
 
     const renameButton = document.createElement("button");
 
     renameButton.textContent = "Rename";
-
     renameButton.onclick = () => renameBike(bike.id);
 
     const deleteButton = document.createElement("button");
 
     deleteButton.textContent = "Delete";
-
     deleteButton.className = "delete-button";
-
     deleteButton.onclick = () => deleteBike(bike.id);
 
     buttons.append(
@@ -1197,9 +1269,9 @@ function showSavedBikes() {
     container.appendChild(card);
   });
 
-  // Persist updated performance information for older saved bikes.
   storeSavedBikes(savedBikes);
 }
+
 
 /* =========================================
    EDITING STATUS
@@ -1227,16 +1299,17 @@ function updateEditingStatus() {
     : "Not currently editing a saved bike.";
 }
 
+
 /* =========================================
    INITIALIZATION
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // Add Controller category automatically.
+  // Controller category.
   addControllerButton();
 
-  // Live frame color sliders.
+  // Frame adjustment sliders.
   [
     "frame-hue",
     "frame-saturation",
@@ -1259,6 +1332,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateEditingStatus();
 
   console.log(
-    "SUPER73 ZX SE Builder loaded successfully with performance database."
+    "SUPER73 ZX SE Builder loaded successfully with brakes and chain."
   );
 });
