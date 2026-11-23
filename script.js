@@ -463,8 +463,8 @@ function getLayerPosition(category, position) {
     },
      
     brakes: {
-      left: "-5%",
-      top: "-5%",
+      left: "-10%",
+      top: "-10%",
       width: "105%",
       height: "105%"
     },
