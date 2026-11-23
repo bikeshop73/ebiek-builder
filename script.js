@@ -568,7 +568,7 @@ function createBikeCanvas(
       }
 
       if (category === "brakes") {
-        image.style.transform = "rotate(1deg)";
+        image.style.transform = "rotate(2deg)";
         image.style.transformOrigin = "center center";
       }
 
