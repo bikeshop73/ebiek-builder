@@ -1,13 +1,40 @@
 
-/* =========================================
-   SUPER73 ZX SE BUILDER
-   COMPLETE SCRIPT
-   BRAKES + CHAIN
-========================================= */
+// ============================================
+// VEHICLE BUILDER
+// E-BIKE + DIRTBIKE + MY GARAGE
+// ============================================
 
-/* =========================================
-   PARTS DATABASE
-========================================= */
+
+// ============================================
+// NAVIGATION
+// ============================================
+
+document.querySelectorAll(".nav-tab").forEach(button => {
+  button.addEventListener("click", () => {
+    const page = button.dataset.page;
+
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+      tab.classList.remove("active");
+    });
+
+    document.querySelectorAll(".page").forEach(section => {
+      section.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    document.getElementById(page + "-page").classList.add("active");
+
+    if (page === "garage") {
+      showSavedBikes();
+    }
+  });
+});
+
+
+// ============================================
+// E-BIKE PARTS DATABASE
+// ============================================
 
 const parts = {
   frame: [
@@ -57,10 +84,8 @@ const parts = {
   ],
 
   battery: [
-    "IMG_5984.PNG",
-    "IMG_5985.PNG",
-    "IMG_5988.PNG",
-    "IMG_7000.PNG"
+    "IMG_5984.PNG", "IMG_5985.PNG",
+    "IMG_5988.PNG", "IMG_7000.PNG"
   ],
 
   fenders: [
@@ -74,28 +99,13 @@ const parts = {
     "IMG_6033.PNG", "IMG_6034.PNG"
   ],
 
-  brakes: [
-    "IMG_6057.PNG",
-    "IMG_6058.PNG",
-    "IMG_6060.PNG"
-  ],
+  brakes: ["IMG_6057.PNG", "IMG_6058.PNG", "IMG_6060.PNG"],
 
-  chain: [
-    "IMG_6061.PNG"
-  ],
+  chain: ["IMG_6061.PNG"],
 
-  controller: [
-    "Stock",
-    "BAC855",
-    "BAC2000",
-    "FarDriver"
-  ]
+  controller: ["Stock", "BAC855", "BAC2000", "FarDriver"]
 };
 
-
-/* =========================================
-   IMAGE FOLDERS
-========================================= */
 
 const folders = {
   frame: "Frames",
@@ -115,10 +125,6 @@ const folders = {
 };
 
 
-/* =========================================
-   OPTION NAMES
-========================================= */
-
 const optionNames = {
   frame: [
     "White", "Red", "Orange", "Yellow", "Lime",
@@ -127,14 +133,10 @@ const optionNames = {
   ],
 
   frontForks: [
-    "Silver Inverted",
-    "Inverted",
-    "Gold Inverted",
+    "Silver Inverted", "Inverted", "Gold Inverted",
     "Silver Triple Clamp Normal",
     "Silver Triple Clamp + Silver Bottom",
-    "Black Normal",
-    "Silver Bottom Normal",
-    "Bucklos"
+    "Black Normal", "Silver Bottom Normal", "Bucklos"
   ],
 
   frontWheel: ["Black", "Chrome"],
@@ -149,10 +151,7 @@ const optionNames = {
   motor: ["1350W", "4,000W"],
 
   handlebars: [
-    "Stock",
-    "Mountain Bike Bars",
-    "Harley Riser",
-    "ProTaper"
+    "Stock", "Mountain Bike Bars", "Harley Riser", "ProTaper"
   ],
 
   seat: [
@@ -186,27 +185,16 @@ const optionNames = {
     "Black Peg Swap"
   ],
 
-  brakes: [
-    "Stock Tektro",
-    "UB Brakes",
-    "Magura Brakes"
-  ],
-
+  brakes: ["Stock Tektro", "UB Brakes", "Magura Brakes"],
   chain: ["Chain"],
 
-  controller: [
-    "Stock",
-    "BAC855",
-    "BAC2000",
-    "FarDriver"
-  ]
+  controller: ["Stock", "BAC855", "BAC2000", "FarDriver"]
 };
 
 
-/* =========================================
-   PERFORMANCE DATABASE
-   FORMAT: [TOP SPEED, WATTAGE]
-========================================= */
+// ============================================
+// E-BIKE PERFORMANCE DATABASE
+// ============================================
 
 const performanceDatabase = {
   "Surron|1350W": {
@@ -267,9 +255,9 @@ const performanceDatabase = {
 };
 
 
-/* =========================================
-   CURRENT BUILD
-========================================= */
+// ============================================
+// E-BIKE CURRENT BUILD
+// ============================================
 
 let selectedParts = {};
 
@@ -287,9 +275,9 @@ const allowedAccessoryPairs = [
 ];
 
 
-/* =========================================
-   BIKE IMAGE LAYERS
-========================================= */
+// ============================================
+// E-BIKE IMAGE LAYERS
+// ============================================
 
 const layers = [
   { category: "brakes" },
@@ -310,31 +298,19 @@ const layers = [
 ];
 
 
-/* =========================================
-   PERFORMANCE CALCULATOR
-========================================= */
+// ============================================
+// E-BIKE PERFORMANCE
+// ============================================
 
 function getPerformanceStats(partsToCheck) {
-  const zeroStats = {
-    topSpeed: 0,
-    wattage: 0
-  };
+  const zeroStats = { topSpeed: 0, wattage: 0 };
 
   if (!partsToCheck) return zeroStats;
 
   const batterySelection = partsToCheck.battery;
 
-  if (
-    !Array.isArray(batterySelection) ||
-    batterySelection.length !== 1
-  ) {
-    return zeroStats;
-  }
-
-  const motorFilename = partsToCheck.motor;
-  const controller = partsToCheck.controller;
-
-  if (!motorFilename || !controller) {
+  if (!Array.isArray(batterySelection) ||
+      batterySelection.length !== 1) {
     return zeroStats;
   }
 
@@ -351,9 +327,10 @@ function getPerformanceStats(partsToCheck) {
   };
 
   const batteryName = batteryNames[batterySelection[0]];
-  const motorName = motorNames[motorFilename];
+  const motorName = motorNames[partsToCheck.motor];
+  const controller = partsToCheck.controller;
 
-  if (!batteryName || !motorName) {
+  if (!batteryName || !motorName || !controller) {
     return zeroStats;
   }
 
@@ -373,15 +350,12 @@ function getPerformanceStats(partsToCheck) {
 }
 
 
-/* =========================================
-   IMAGE PATH
-========================================= */
+// ============================================
+// IMAGE PATH
+// ============================================
 
 function imagePath(category, filename) {
-  if (!folders[category]) {
-    console.error("Missing image folder:", category);
-    return "";
-  }
+  if (!folders[category]) return "";
 
   return new URL(
     "images/" + folders[category] + "/" + filename,
@@ -390,97 +364,63 @@ function imagePath(category, filename) {
 }
 
 
-/* =========================================
-   FRAME COLOR PROCESSING
-========================================= */
+// ============================================
+// FRAME COLOR FILTER
+// ============================================
 
 function getFrameFilter(colors) {
-  const hue = Number(colors?.hue ?? 0);
-  const saturation = Number(colors?.saturation ?? 100);
-  const brightness = Number(colors?.brightness ?? 100);
-
   return `
-    hue-rotate(${hue}deg)
-    saturate(${saturation}%)
-    brightness(${brightness}%)
+    hue-rotate(${Number(colors?.hue ?? 0)}deg)
+    saturate(${Number(colors?.saturation ?? 100)}%)
+    brightness(${Number(colors?.brightness ?? 100)}%)
   `.trim();
 }
 
 
-/* =========================================
-   PART POSITIONING
-========================================= */
+// ============================================
+// E-BIKE IMAGE POSITIONS
+// ============================================
 
 function getLayerPosition(category, position) {
   const positions = {
     frontForks: {
-      left: "42%",
-      top: "7%",
-      width: "58%",
-      height: "78%"
+      left: "42%", top: "7%", width: "58%", height: "78%"
     },
 
     frontWheel: {
-      left: "70%",
-      top: "53%",
-      width: "27%",
-      height: "27%"
+      left: "70%", top: "53%", width: "27%", height: "27%"
     },
 
     rearWheel: {
-      left: "4%",
-      top: "52%",
-      width: "27%",
-      height: "27%"
+      left: "4%", top: "52%", width: "27%", height: "27%"
     },
 
     rearTire: {
-      left: "1%",
-      top: "48%",
-      width: "34%",
-      height: "34%"
+      left: "1%", top: "48%", width: "34%", height: "34%"
     },
 
     frontTire: {
-      left: "66.5%",
-      top: "49%",
-      width: "34%",
-      height: "34%"
+      left: "66.5%", top: "49%", width: "34%", height: "34%"
     },
 
     motor: {
-      left: "5.5%",
-      top: "52.5%",
-      width: "24%",
-      height: "24%"
+      left: "5.5%", top: "52.5%", width: "24%", height: "24%"
     },
 
     handlebars: {
-      left: "53.5%",
-      top: "13%",
-      width: "24%",
-      height: "24%"
+      left: "53.5%", top: "13%", width: "24%", height: "24%"
     },
-     
+
     brakes: {
-      left: "-2%",
-      top: "-2%",
-      width: "105%",
-      height: "105%"
+      left: "-2%", top: "-2%", width: "105%", height: "105%"
     },
 
     fenders: {
-      left: "57.5%",
-      top: "22%",
-      width: "29%",
-      height: "29%"
+      left: "57.5%", top: "22%", width: "29%", height: "29%"
     },
 
     lights: {
-      left: "64%",
-      top: "27%",
-      width: "10%",
-      height: "10%"
+      left: "64%", top: "27%", width: "10%", height: "10%"
     }
   };
 
@@ -499,16 +439,11 @@ function getLayerPosition(category, position) {
 }
 
 
-/* =========================================
-   CREATE BIKE CANVAS
-========================================= */
+// ============================================
+// CREATE E-BIKE CANVAS
+// ============================================
 
-function createBikeCanvas(
-  parent,
-  partsToShow,
-  colorsToShow,
-  thumbnail = false
-) {
+function createBikeCanvas(parent, partsToShow, colorsToShow, thumbnail = false) {
   const canvas = document.createElement("div");
 
   canvas.className = thumbnail
@@ -526,8 +461,7 @@ function createBikeCanvas(
   });
 
   layers.forEach((layer, layerIndex) => {
-    const category = layer.category;
-    const selected = partsToShow[category];
+    const selected = partsToShow[layer.category];
 
     if (!selected) return;
 
@@ -536,19 +470,18 @@ function createBikeCanvas(
       : [selected];
 
     filenames.forEach(filename => {
-      const source = imagePath(category, filename);
-
+      const source = imagePath(layer.category, filename);
       if (!source) return;
 
       const position = getLayerPosition(
-        category,
+        layer.category,
         layer.position
       );
 
       const image = document.createElement("img");
 
       image.src = source;
-      image.alt = category;
+      image.alt = layer.category;
       image.draggable = false;
 
       Object.assign(image.style, {
@@ -563,36 +496,31 @@ function createBikeCanvas(
         maxWidth: "none"
       });
 
-      if (category === "frame") {
+      if (layer.category === "frame") {
         image.style.filter = getFrameFilter(colorsToShow);
       }
 
-      if (category === "brakes") {
+      if (layer.category === "brakes") {
         image.style.transform = "rotate(2deg)";
-        image.style.transformOrigin = "center center";
       }
 
-      image.onerror = () => {
-        console.error("Image failed:", source);
-      };
+      image.onerror = () => console.error("Image failed:", source);
 
       canvas.appendChild(image);
     });
   });
 
   parent.appendChild(canvas);
-
   return canvas;
 }
 
 
-/* =========================================
-   MAIN PREVIEW
-========================================= */
+// ============================================
+// E-BIKE PREVIEW
+// ============================================
 
 function updatePreview() {
   const preview = document.getElementById("bike-preview");
-
   if (!preview) return;
 
   preview.innerHTML = "";
@@ -600,24 +528,18 @@ function updatePreview() {
   const title = document.createElement("h2");
   title.textContent = "SUPER73 ZX SE";
 
-  preview.appendChild(title);
-
   const holder = document.createElement("div");
   holder.className = "preview-canvas-holder";
 
-  preview.appendChild(holder);
+  preview.append(title, holder);
 
-  createBikeCanvas(
-    holder,
-    selectedParts,
-    selectedColors
-  );
+  createBikeCanvas(holder, selectedParts, selectedColors);
 }
 
 
-/* =========================================
-   FRAME SLIDERS
-========================================= */
+// ============================================
+// FRAME SLIDERS
+// ============================================
 
 function changeFrameAdjustment() {
   const hue = document.getElementById("frame-hue");
@@ -626,21 +548,12 @@ function changeFrameAdjustment() {
 
   if (!hue || !saturation || !brightness) return;
 
-  selectedColors.hue = Number(hue.value);
-  selectedColors.saturation = Number(saturation.value);
-  selectedColors.brightness = Number(brightness.value);
-
-  updatePreview();
-}
-
-function resetFrameAdjustments() {
   selectedColors = {
-    hue: 0,
-    saturation: 100,
-    brightness: 100
+    hue: Number(hue.value),
+    saturation: Number(saturation.value),
+    brightness: Number(brightness.value)
   };
 
-  resetSliderDisplay();
   updatePreview();
 }
 
@@ -654,25 +567,31 @@ function resetSliderDisplay() {
   if (brightness) brightness.value = selectedColors.brightness;
 }
 
+function resetFrameAdjustments() {
+  selectedColors = {
+    hue: 0,
+    saturation: 100,
+    brightness: 100
+  };
 
-/* =========================================
-   CONTROLLER CATEGORY BUTTON
-========================================= */
+  resetSliderDisplay();
+  updatePreview();
+}
+
+
+// ============================================
+// CONTROLLER BUTTON
+// ============================================
 
 function addControllerButton() {
   const categories = document.querySelector(".categories");
-
-  if (!categories) {
-    console.error("Could not find .categories container.");
-    return;
-  }
+  if (!categories) return;
 
   if (categories.querySelector('[data-category="controller"]')) {
     return;
   }
 
   const button = document.createElement("button");
-
   button.type = "button";
   button.textContent = "Controller";
   button.dataset.category = "controller";
@@ -685,9 +604,9 @@ function addControllerButton() {
 }
 
 
-/* =========================================
-   CATEGORY SELECTION
-========================================= */
+// ============================================
+// CATEGORY SELECTION
+// ============================================
 
 function selectCategory(category) {
   const container = document.getElementById("parts-list");
@@ -705,37 +624,28 @@ function selectCategory(category) {
   };
 
   const heading = document.createElement("h3");
-
-  heading.textContent =
-    headingNames[category] ||
+  heading.textContent = headingNames[category] ||
     category.replace(/([A-Z])/g, " $1");
-
-  container.appendChild(heading);
 
   const options = document.createElement("div");
   options.className = "part-options";
 
+  container.appendChild(heading);
+  container.appendChild(options);
+
   parts[category].forEach((filename, index) => {
     const option = document.createElement("button");
-
     option.type = "button";
     option.className = "part-option";
 
     if (category !== "controller") {
       const image = document.createElement("img");
-
       image.src = imagePath(category, filename);
       image.alt = optionNames[category]?.[index] || filename;
-
-      image.onerror = () => {
-        console.error("Thumbnail failed:", image.src);
-      };
-
       option.appendChild(image);
     }
 
     const name = document.createElement("span");
-
     name.textContent =
       optionNames[category]?.[index] ||
       `Unlabeled Option ${index + 1}`;
@@ -748,28 +658,20 @@ function selectCategory(category) {
       ? current.includes(filename)
       : current === filename;
 
-    if (isSelected) {
-      option.classList.add("selected");
-    }
+    if (isSelected) option.classList.add("selected");
 
-    option.onclick = () => {
-      selectPart(category, filename, index);
-    };
+    option.onclick = () => selectPart(category, filename, index);
 
     options.appendChild(option);
   });
-
-  container.appendChild(options);
 }
 
 
-/* =========================================
-   SELECT PART
-========================================= */
+// ============================================
+// SELECT E-BIKE PART
+// ============================================
 
 function selectPart(category, filename, index) {
-
-  // Controller: single selection.
   if (category === "controller") {
     if (selectedParts.controller === filename) {
       delete selectedParts.controller;
@@ -780,21 +682,16 @@ function selectPart(category, filename, index) {
     updatePreview();
     selectCategory(category);
     updateEditingStatus();
-
     return;
   }
 
-  // Batteries and accessories: up to two selections.
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
-    if (!Array.isArray(current)) {
-      current = [current];
-    }
+    if (!Array.isArray(current)) current = [current];
 
     if (current.includes(filename)) {
       current = current.filter(item => item !== filename);
-
     } else {
       if (current.length >= 2) {
         alert("You can only select two.");
@@ -809,7 +706,6 @@ function selectPart(category, filename, index) {
             alert("Choose two batteries next to each other.");
             return;
           }
-
         } else {
           const allowed = allowedAccessoryPairs.some(pair =>
             pair.includes(firstIndex) && pair.includes(index)
@@ -830,9 +726,7 @@ function selectPart(category, filename, index) {
     } else {
       delete selectedParts[category];
     }
-
   } else {
-    // Brakes, chain, wheels, frame, etc.: single selection.
     if (selectedParts[category] === filename) {
       delete selectedParts[category];
     } else {
@@ -846,9 +740,113 @@ function selectPart(category, filename, index) {
 }
 
 
-/* =========================================
-   GARAGE STORAGE
-========================================= */
+// ============================================
+// DIRTBIKE BUILDER
+// ============================================
+
+let dirtbikeBuild = {
+  model: "Yamaha YZ250X",
+  engine: "Yamaha 250 2-Stroke",
+  color: "Blue"
+};
+
+let editingDirtbikeId = null;
+
+const dirtbikeModels = [
+  "Yamaha YZ250X",
+  "Yamaha YZ250F",
+  "Yamaha YZ450F",
+  "Honda CR250R",
+  "Honda CRF250R",
+  "Honda CRF450R"
+];
+
+const dirtbikeEngines = [
+  "Yamaha 250 2-Stroke",
+  "Yamaha 250 4-Stroke",
+  "Yamaha 450 4-Stroke",
+  "Honda 250 2-Stroke",
+  "Honda 250 4-Stroke",
+  "Honda 450 4-Stroke"
+];
+
+function selectDirtbike(model) {
+  if (!dirtbikeModels.includes(model)) return;
+
+  dirtbikeBuild.model = model;
+  updateDirtbikePreview();
+  updateDirtbikeStatus();
+}
+
+function selectDirtbikeEngine(engine) {
+  if (!dirtbikeEngines.includes(engine)) return;
+
+  dirtbikeBuild.engine = engine;
+  updateDirtbikePreview();
+  updateDirtbikeStatus();
+}
+
+function selectDirtbikeColor(color) {
+  dirtbikeBuild.color = color;
+  updateDirtbikePreview();
+  updateDirtbikeStatus();
+}
+
+function updateDirtbikePreview() {
+  const preview = document.getElementById("dirtbike-preview");
+  if (!preview) return;
+
+  preview.innerHTML = "";
+
+  const title = document.createElement("h2");
+  title.textContent = dirtbikeBuild.model;
+
+  const details = document.createElement("div");
+  details.className = "dirtbike-details";
+
+  details.innerHTML = `
+    <p><strong>Engine:</strong> ${escapeHTML(dirtbikeBuild.engine)}</p>
+    <p><strong>Color:</strong> ${escapeHTML(dirtbikeBuild.color)}</p>
+  `;
+
+  const note = document.createElement("p");
+  note.textContent =
+    "Dirt bike image layers can be added when your model images are ready.";
+
+  note.style.marginTop = "18px";
+  note.style.color = "#888";
+
+  preview.append(title, details, note);
+
+  const engineDisplay = document.getElementById("selected-engine");
+  const colorDisplay = document.getElementById("selected-color");
+
+  if (engineDisplay) {
+    engineDisplay.textContent = "Selected engine: " + dirtbikeBuild.engine;
+  }
+
+  if (colorDisplay) {
+    colorDisplay.textContent = "Selected color: " + dirtbikeBuild.color;
+  }
+}
+
+function updateDirtbikeStatus() {
+  const status = document.getElementById("dirtbike-editing-status");
+  if (!status) return;
+
+  const bike = getSavedBikes().find(item =>
+    item.id === editingDirtbikeId && item.type === "dirtbike"
+  );
+
+  status.textContent = bike
+    ? "Editing: " + bike.name + " — Save Dirtbike updates this build."
+    : "Not currently editing a saved dirt bike.";
+}
+
+
+// ============================================
+// SHARED GARAGE STORAGE
+// ============================================
 
 function getSavedBikes() {
   try {
@@ -856,146 +854,203 @@ function getSavedBikes() {
       localStorage.getItem("savedBikes") || "[]"
     );
 
-    return Array.isArray(saved) ? saved : [];
-
+    return Array.isArray(saved)
+      ? saved.map(bike => ({
+          ...bike,
+          type: bike.type || "ebike"
+        }))
+      : [];
   } catch (error) {
-    console.error("Could not load bikes:", error);
+    console.error("Could not load garage:", error);
     return [];
   }
 }
 
 function storeSavedBikes(bikes) {
   try {
-    localStorage.setItem(
-      "savedBikes",
-      JSON.stringify(bikes)
-    );
-
+    localStorage.setItem("savedBikes", JSON.stringify(bikes));
     return true;
-
   } catch (error) {
-    console.error("Could not save bikes:", error);
-
+    console.error("Could not save garage:", error);
     alert("Could not save. Browser storage may be full.");
-
     return false;
   }
 }
 
 
-/* =========================================
-   CREATE SAVED BIKE DATA
-========================================= */
+// ============================================
+// E-BIKE SAVING
+// ============================================
 
 function createBikeData(name) {
-  const performance = getPerformanceStats(selectedParts);
-
   return {
     id: Date.now(),
-    name: name,
-
+    type: "ebike",
+    name,
     parts: JSON.parse(JSON.stringify(selectedParts)),
-
     colors: { ...selectedColors },
-
-    performance: {
-      topSpeed: performance.topSpeed,
-      wattage: performance.wattage
-    }
+    performance: getPerformanceStats(selectedParts)
   };
 }
 
-
-/* =========================================
-   SAVE BIKE
-========================================= */
-
 function saveBike() {
-  const savedBikes = getSavedBikes();
+  const saved = getSavedBikes();
 
   if (editingBikeId !== null) {
-    const bike = savedBikes.find(
-      item => item.id === editingBikeId
+    const bike = saved.find(item =>
+      item.id === editingBikeId && item.type === "ebike"
     );
 
     if (bike) {
-      bike.parts = JSON.parse(
-        JSON.stringify(selectedParts)
-      );
-
+      bike.parts = JSON.parse(JSON.stringify(selectedParts));
       bike.colors = { ...selectedColors };
       bike.performance = getPerformanceStats(selectedParts);
 
-      if (!storeSavedBikes(savedBikes)) return;
+      if (!storeSavedBikes(saved)) return;
 
       showSavedBikes();
       updateEditingStatus();
-
-      alert("Your changes have been saved!");
-
+      alert("Your e-bike changes have been saved!");
       return;
     }
   }
 
-  const name = prompt("What do you want to name your bike?");
-
+  const name = prompt("What do you want to name your e-bike?");
   if (!name || !name.trim()) return;
 
-  const newBike = createBikeData(name.trim());
+  const bike = createBikeData(name.trim());
+  saved.push(bike);
 
-  savedBikes.push(newBike);
+  if (!storeSavedBikes(saved)) return;
 
-  if (!storeSavedBikes(savedBikes)) return;
-
-  editingBikeId = newBike.id;
-
+  editingBikeId = bike.id;
   updateEditingStatus();
   showSavedBikes();
-
-  alert("Bike saved!");
+  alert("E-bike saved!");
 }
-
-
-/* =========================================
-   SAVE AS NEW
-========================================= */
 
 function saveBikeAsNew() {
-  const name = prompt("Name your new bike:");
-
+  const name = prompt("Name your new e-bike:");
   if (!name || !name.trim()) return;
 
-  const savedBikes = getSavedBikes();
+  const saved = getSavedBikes();
+  const bike = createBikeData(name.trim());
 
-  const newBike = createBikeData(name.trim());
+  saved.push(bike);
 
-  savedBikes.push(newBike);
+  if (!storeSavedBikes(saved)) return;
 
-  if (!storeSavedBikes(savedBikes)) return;
-
-  editingBikeId = newBike.id;
-
+  editingBikeId = bike.id;
   updateEditingStatus();
   showSavedBikes();
-
-  alert("New bike saved!");
+  alert("New e-bike saved!");
 }
 
 
-/* =========================================
-   LOAD BIKE
-========================================= */
+// ============================================
+// DIRTBIKE SAVING
+// ============================================
+
+function createDirtbikeData(name) {
+  return {
+    id: Date.now(),
+    type: "dirtbike",
+    name,
+    dirtbike: { ...dirtbikeBuild }
+  };
+}
+
+function saveDirtbike() {
+  const saved = getSavedBikes();
+
+  if (editingDirtbikeId !== null) {
+    const bike = saved.find(item =>
+      item.id === editingDirtbikeId && item.type === "dirtbike"
+    );
+
+    if (bike) {
+      bike.dirtbike = { ...dirtbikeBuild };
+
+      if (!storeSavedBikes(saved)) return;
+
+      showSavedBikes();
+      updateDirtbikeStatus();
+      alert("Your dirt bike changes have been saved!");
+      return;
+    }
+  }
+
+  const name = prompt("What do you want to name your dirt bike?");
+  if (!name || !name.trim()) return;
+
+  const bike = createDirtbikeData(name.trim());
+  saved.push(bike);
+
+  if (!storeSavedBikes(saved)) return;
+
+  editingDirtbikeId = bike.id;
+  updateDirtbikeStatus();
+  showSavedBikes();
+  alert("Dirt bike saved!");
+}
+
+function saveDirtbikeAsNew() {
+  const name = prompt("Name your new dirt bike:");
+  if (!name || !name.trim()) return;
+
+  const saved = getSavedBikes();
+  const bike = createDirtbikeData(name.trim());
+
+  saved.push(bike);
+
+  if (!storeSavedBikes(saved)) return;
+
+  editingDirtbikeId = bike.id;
+  updateDirtbikeStatus();
+  showSavedBikes();
+  alert("New dirt bike saved!");
+}
+
+
+// ============================================
+// GARAGE FILTER
+// ============================================
+
+let garageFilter = "all";
+
+function showGarageType(type) {
+  garageFilter = type;
+  showSavedBikes();
+}
+
+
+// ============================================
+// SAFE TEXT
+// ============================================
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+
+// ============================================
+// LOAD E-BIKE
+// ============================================
 
 function loadBike(id) {
-  const bike = getSavedBikes().find(
-    item => item.id === id
+  const bike = getSavedBikes().find(item =>
+    item.id === id && item.type === "ebike"
   );
 
   if (!bike) return;
 
-  selectedParts = JSON.parse(
-    JSON.stringify(bike.parts || {})
-  );
+  selectedParts = JSON.parse(JSON.stringify(bike.parts || {}));
 
   selectedColors = {
     hue: bike.colors?.hue ?? 0,
@@ -1005,293 +1060,247 @@ function loadBike(id) {
 
   editingBikeId = bike.id;
 
+  switchPage("ebike");
+
   resetSliderDisplay();
   updatePreview();
   updateEditingStatus();
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-  alert("Bike loaded! You can now edit it.");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 
-/* =========================================
-   RENAME BIKE
-========================================= */
+// ============================================
+// LOAD DIRTBIKE
+// ============================================
 
-function renameBike(id) {
-  const savedBikes = getSavedBikes();
-
-  const bike = savedBikes.find(
-    item => item.id === id
+function loadDirtbike(id) {
+  const bike = getSavedBikes().find(item =>
+    item.id === id && item.type === "dirtbike"
   );
 
   if (!bike) return;
 
-  const newName = prompt(
-    "Enter a new name:",
-    bike.name
-  );
+  dirtbikeBuild = {
+    model: bike.dirtbike?.model || "Yamaha YZ250X",
+    engine: bike.dirtbike?.engine || "Yamaha 250 2-Stroke",
+    color: bike.dirtbike?.color || "Blue"
+  };
+
+  editingDirtbikeId = bike.id;
+
+  switchPage("dirtbike");
+  updateDirtbikePreview();
+  updateDirtbikeStatus();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+
+// ============================================
+// SWITCH PAGE
+// ============================================
+
+function switchPage(page) {
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.page === page);
+  });
+
+  document.querySelectorAll(".page").forEach(section => {
+    section.classList.toggle("active", section.id === page + "-page");
+  });
+}
+
+
+// ============================================
+// RENAME BIKE
+// ============================================
+
+function renameBike(id) {
+  const saved = getSavedBikes();
+  const bike = saved.find(item => item.id === id);
+
+  if (!bike) return;
+
+  const newName = prompt("Enter a new name:", bike.name);
 
   if (!newName || !newName.trim()) return;
 
   bike.name = newName.trim();
 
-  if (!storeSavedBikes(savedBikes)) return;
+  if (!storeSavedBikes(saved)) return;
 
   showSavedBikes();
-  updateEditingStatus();
 }
 
 
-/* =========================================
-   DELETE BIKE
-========================================= */
+// ============================================
+// DELETE BIKE
+// ============================================
 
 function deleteBike(id) {
   if (!confirm("Are you sure you want to delete this bike?")) {
     return;
   }
 
-  const savedBikes = getSavedBikes().filter(
-    bike => bike.id !== id
-  );
+  const saved = getSavedBikes().filter(item => item.id !== id);
 
-  if (!storeSavedBikes(savedBikes)) return;
+  if (!storeSavedBikes(saved)) return;
 
   if (editingBikeId === id) {
     editingBikeId = null;
     updateEditingStatus();
   }
 
+  if (editingDirtbikeId === id) {
+    editingDirtbikeId = null;
+    updateDirtbikeStatus();
+  }
+
   showSavedBikes();
 }
 
 
-/* =========================================
-   MY GARAGE
-========================================= */
+// ============================================
+// DISPLAY GARAGE
+// ============================================
 
 function showSavedBikes() {
   const container = document.getElementById("saved-bikes");
-
   if (!container) return;
 
   container.innerHTML = "";
 
-  const savedBikes = getSavedBikes();
+  const saved = getSavedBikes();
 
-  if (!savedBikes.length) {
+  const visible = saved.filter(bike =>
+    garageFilter === "all" || bike.type === garageFilter
+  );
+
+  if (!visible.length) {
     const empty = document.createElement("p");
 
-    empty.textContent =
-      "Your garage is empty. Save a bike to get started.";
+    empty.textContent = garageFilter === "all"
+      ? "Your garage is empty. Save a bike to get started."
+      : "No bikes in this category yet.";
 
     container.appendChild(empty);
-
     return;
   }
 
-  const batteryLabels = {
-    "IMG_5984.PNG": "60V Surron LBX Battery",
-    "IMG_5985.PNG": "Stock Battery",
-    "IMG_5988.PNG": "81V Chi Battery",
-    "IMG_7000.PNG": "60V Handleworks Battery"
-  };
-
-  const motorLabels = {
-    "IMG_5959.PNG": "1350W",
-    "IMG_5993.PNG": "4,000W"
-  };
-
-  const brakeLabels = {
-    "IMG_6057.PNG": "Stock Tektro",
-    "IMG_6058.PNG": "UB Brakes",
-    "IMG_6060.PNG": "Magura Brakes"
-  };
-
-  savedBikes.forEach(bike => {
+  visible.forEach(bike => {
     const card = document.createElement("div");
     card.className = "garage-card";
 
     const title = document.createElement("h3");
     title.textContent = bike.name;
 
+    const type = document.createElement("div");
+    type.className = "bike-type";
+    type.textContent = bike.type === "dirtbike" ? "DIRT BIKE" : "E-BIKE";
+
     const preview = document.createElement("div");
     preview.className = "garage-bike-preview";
 
-    createBikeCanvas(
-      preview,
-      bike.parts || {},
-      bike.colors || {
-        hue: 0,
-        saturation: 100,
-        brightness: 100
-      },
-      true
-    );
+    const details = document.createElement("div");
 
-    const stats = getPerformanceStats(bike.parts || {});
+    if (bike.type === "ebike") {
+      createBikeCanvas(
+        preview,
+        bike.parts || {},
+        bike.colors || { hue: 0, saturation: 100, brightness: 100 },
+        true
+      );
 
-    bike.performance = stats;
+      const stats = getPerformanceStats(bike.parts || {});
 
-    // PERFORMANCE DISPLAY.
-    const performance = document.createElement("div");
-    performance.className = "bike-performance";
+      const performance = document.createElement("p");
+      performance.textContent =
+        "Top Speed: " + stats.topSpeed + " MPH | Power: " +
+        stats.wattage.toLocaleString() + "W";
 
-    Object.assign(performance.style, {
-      display: "flex",
-      justifyContent: "center",
-      gap: "24px",
-      flexWrap: "wrap",
-      margin: "12px 0",
-      padding: "12px",
-      borderRadius: "10px",
-      background: "#202020",
-      color: "white",
-      textAlign: "center"
-    });
+      details.appendChild(performance);
 
-    const speed = document.createElement("div");
-    const speedLabel = document.createElement("div");
+      const batteryLabels = {
+        "IMG_5984.PNG": "60V Surron LBX",
+        "IMG_5985.PNG": "Stock Battery",
+        "IMG_5988.PNG": "81V Chi Battery",
+        "IMG_7000.PNG": "60V Handleworks"
+      };
 
-    speedLabel.textContent = "TOP SPEED";
-    speedLabel.style.fontSize = "11px";
-    speedLabel.style.opacity = "0.7";
+      const motorLabels = {
+        "IMG_5959.PNG": "1350W",
+        "IMG_5993.PNG": "4000W"
+      };
 
-    const speedValue = document.createElement("strong");
-    speedValue.textContent = stats.topSpeed + " MPH";
-    speedValue.style.fontSize = "20px";
+      const battery = bike.parts?.battery;
+      const batteryText = Array.isArray(battery)
+        ? battery.map(item => batteryLabels[item] || item).join(" + ")
+        : "None";
 
-    speed.append(speedLabel, speedValue);
+      const componentInfo = document.createElement("p");
+      componentInfo.textContent =
+        "Battery: " + batteryText +
+        " | Motor: " + (motorLabels[bike.parts?.motor] || "None") +
+        " | Controller: " + (bike.parts?.controller || "None");
 
-    const power = document.createElement("div");
-    const powerLabel = document.createElement("div");
+      details.appendChild(componentInfo);
 
-    powerLabel.textContent = "WATTAGE";
-    powerLabel.style.fontSize = "11px";
-    powerLabel.style.opacity = "0.7";
+    } else {
+      const model = document.createElement("h2");
+      model.textContent = bike.dirtbike?.model || "Dirt Bike";
+      model.style.textAlign = "center";
+      model.style.padding = "35px 5px";
 
-    const powerValue = document.createElement("strong");
+      preview.appendChild(model);
 
-    powerValue.textContent =
-      stats.wattage.toLocaleString() + "W";
+      const engine = document.createElement("p");
+      engine.textContent = "Engine: " +
+        (bike.dirtbike?.engine || "Not selected");
 
-    powerValue.style.fontSize = "20px";
+      const color = document.createElement("p");
+      color.textContent = "Color: " +
+        (bike.dirtbike?.color || "Not selected");
 
-    power.append(powerLabel, powerValue);
+      details.append(engine, color);
+    }
 
-    performance.append(speed, power);
-
-    // COMPONENT INFORMATION.
-    const components = document.createElement("div");
-    components.className = "bike-components";
-
-    const componentNames = document.createElement("p");
-
-    const batterySelection = bike.parts?.battery;
-
-    const batteryText = Array.isArray(batterySelection)
-      ? batterySelection
-          .map(item => batteryLabels[item] || item)
-          .join(" + ")
-      : "None";
-
-    const motorText =
-      motorLabels[bike.parts?.motor] || "None";
-
-    const controllerText =
-      bike.parts?.controller || "None";
-
-    const brakeText =
-      brakeLabels[bike.parts?.brakes] || "None";
-
-    const chainText =
-      bike.parts?.chain ? "Chain" : "None";
-
-    componentNames.textContent =
-      "Battery: " + batteryText +
-      " | Motor: " + motorText +
-      " | Controller: " + controllerText +
-      " | Brakes: " + brakeText +
-      " | Chain: " + chainText;
-
-    components.appendChild(componentNames);
-
-    // GARAGE BUTTONS.
     const buttons = document.createElement("div");
     buttons.className = "garage-buttons";
 
-    const loadButton = document.createElement("button");
-    loadButton.textContent = "Load / Edit";
-    loadButton.onclick = () => loadBike(bike.id);
+    const load = document.createElement("button");
+    load.textContent = "Load / Edit";
+    load.onclick = () => {
+      if (bike.type === "dirtbike") {
+        loadDirtbike(bike.id);
+      } else {
+        loadBike(bike.id);
+      }
+    };
 
-    const renameButton = document.createElement("button");
-    renameButton.textContent = "Rename";
-    renameButton.onclick = () => renameBike(bike.id);
+    const rename = document.createElement("button");
+    rename.textContent = "Rename";
+    rename.onclick = () => renameBike(bike.id);
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.className = "delete-button";
-    deleteButton.onclick = () => deleteBike(bike.id);
+    const remove = document.createElement("button");
+    remove.textContent = "Delete";
+    remove.className = "delete-button";
+    remove.onclick = () => deleteBike(bike.id);
 
-    buttons.append(
-      loadButton,
-      renameButton,
-      deleteButton
-    );
+    buttons.append(load, rename, remove);
 
-    card.append(
-      title,
-      preview,
-      performance,
-      components,
-      buttons
-    );
-
+    card.append(title, type, preview, details, buttons);
     container.appendChild(card);
   });
-
-  storeSavedBikes(savedBikes);
 }
 
 
-/* =========================================
-   EDITING STATUS
-========================================= */
-
-function updateEditingStatus() {
-  const status = document.getElementById("editing-status");
-
-  if (!status) return;
-
-  if (editingBikeId === null) {
-    status.textContent =
-      "Not currently editing a saved bike.";
-
-    return;
-  }
-
-  const bike = getSavedBikes().find(
-    item => item.id === editingBikeId
-  );
-
-  status.textContent = bike
-    ? "Editing: " + bike.name +
-      " — Save Bike updates this build."
-    : "Not currently editing a saved bike.";
-}
-
-
-/* =========================================
-   INITIALIZATION
-========================================= */
+// ============================================
+// INITIALIZATION
+// ============================================
 
 function initializeBuilder() {
-  console.log("Initializing SUPER73 ZX SE Builder...");
+  console.log("Vehicle Builder loading...");
 
   addControllerButton();
 
@@ -1303,29 +1312,23 @@ function initializeBuilder() {
     const slider = document.getElementById(id);
 
     if (slider) {
-      slider.addEventListener(
-        "input",
-        changeFrameAdjustment
-      );
+      slider.addEventListener("input", changeFrameAdjustment);
     }
   });
 
   updatePreview();
+  updateDirtbikePreview();
   showSavedBikes();
   updateEditingStatus();
+  updateDirtbikeStatus();
 
-  console.log(
-    "SUPER73 ZX SE Builder loaded successfully with brakes and chain."
-  );
+  console.log("Vehicle Builder loaded successfully!");
 }
 
-// Works whether the script loads before or after the page DOM.
 if (document.readyState === "loading") {
-  document.addEventListener(
-    "DOMContentLoaded",
-    initializeBuilder,
-    { once: true }
-  );
+  document.addEventListener("DOMContentLoaded", initializeBuilder, {
+    once: true
+  });
 } else {
   initializeBuilder();
 }
