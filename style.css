@@ -30,11 +30,61 @@ header p {
   font-size: 12px;
 }
 
+/* MAIN NAVIGATION */
+
+.main-navigation {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #191919;
+  border-bottom: 1px solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-tab {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 19px 10px;
+  font-size: 15px;
+  font-weight: bold;
+  border-bottom: 3px solid transparent;
+}
+
+.nav-tab:hover {
+  background: #252525;
+}
+
+.nav-tab.active {
+  color: white;
+  background: #252525;
+  border-bottom: 3px solid #d71920;
+}
+
+/* PAGES */
+
 main {
   max-width: 1100px;
   margin: auto;
   padding: 25px;
 }
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.page-title {
+  font-size: 25px;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+}
+
+/* BUTTONS */
 
 button {
   background: #252525;
@@ -67,17 +117,20 @@ button:hover {
   letter-spacing: 2px;
 }
 
-#bike-preview {
+#bike-preview,
+#dirtbike-preview {
   text-align: center;
   padding: 25px 10px;
 }
 
-#bike-preview h2 {
+#bike-preview h2,
+#dirtbike-preview h2 {
   font-size: 25px;
   margin-bottom: 15px;
 }
 
-#bike-preview > p {
+#bike-preview > p,
+#dirtbike-preview > p {
   color: #888;
 }
 
@@ -98,7 +151,8 @@ button:hover {
 
 /* SAVE */
 
-#save-controls {
+#save-controls,
+#dirtbike-save-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -106,7 +160,8 @@ button:hover {
   margin-top: 15px;
 }
 
-#editing-status {
+#editing-status,
+#dirtbike-editing-status {
   color: #888;
   font-size: 12px;
   text-align: center;
@@ -115,7 +170,7 @@ button:hover {
 
 /* FRAME ADJUSTMENTS */
 
-.custom-colors {
+.frame-adjustments {
   margin-top: 25px;
   background: #1c1c1c;
   border: 1px solid #333;
@@ -123,40 +178,23 @@ button:hover {
   padding: 25px;
 }
 
-.custom-colors h2 {
-  margin-bottom: 8px;
+.frame-adjustments h2 {
+  margin-bottom: 18px;
 }
 
-.custom-colors > p {
-  color: #888;
-  font-size: 14px;
-  margin-bottom: 22px;
+.frame-adjustments label {
+  display: block;
+  margin: 15px 0 8px;
 }
 
-.color-slider {
-  margin-bottom: 22px;
-}
-
-.color-slider label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.color-slider label span {
-  color: #d71920;
-  font-weight: bold;
-}
-
-.color-slider input {
+.frame-adjustments input {
   width: 100%;
   accent-color: #d71920;
   cursor: pointer;
 }
 
 .reset-colors {
-  margin-top: 5px;
+  margin-top: 20px;
 }
 
 /* CUSTOMIZER */
@@ -169,7 +207,10 @@ button:hover {
   margin-bottom: 20px;
 }
 
-.categories {
+.categories,
+.bike-selection,
+.engine-selection,
+.dirtbike-colors {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -218,6 +259,29 @@ button:hover {
   background: #351719;
 }
 
+/* DIRT BIKE */
+
+.bike-selection button,
+.engine-selection button,
+.dirtbike-colors button {
+  min-width: 120px;
+}
+
+.section-description {
+  color: #888;
+  margin: -10px 0 15px;
+}
+
+#selected-engine,
+#selected-color {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  padding: 18px;
+  border-radius: 9px;
+  margin-top: 15px;
+  color: #ddd;
+}
+
 /* GARAGE */
 
 .garage {
@@ -225,7 +289,6 @@ button:hover {
   border: 1px solid #333;
   border-radius: 12px;
   padding: 25px;
-  margin-top: 30px;
 }
 
 .garage-heading {
@@ -241,9 +304,17 @@ button:hover {
   margin-bottom: 7px;
 }
 
-.garage-heading p {
+.garage-heading p,
+.garage-description {
   color: #888;
   font-size: 14px;
+}
+
+.garage-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 #saved-bikes {
@@ -269,6 +340,14 @@ button:hover {
   overflow-wrap: anywhere;
 }
 
+.garage-card .bike-type {
+  color: #d71920;
+  font-size: 11px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 .garage-bike-preview {
   background: #202020;
   border-radius: 8px;
@@ -280,10 +359,18 @@ button:hover {
   max-width: 260px;
 }
 
+.garage-card p {
+  color: #aaa;
+  font-size: 13px;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+
 .garage-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  margin-top: 12px;
 }
 
 .garage-buttons button {
@@ -314,9 +401,14 @@ button:hover {
     letter-spacing: 3px;
   }
 
+  .nav-tab {
+    padding: 15px 5px;
+    font-size: 12px;
+  }
+
   .preview,
   .garage,
-  .custom-colors {
+  .frame-adjustments {
     padding: 17px;
   }
 
@@ -332,11 +424,18 @@ button:hover {
     width: 100%;
   }
 
-  #save-controls {
+  #save-controls,
+  #dirtbike-save-controls {
     flex-direction: column;
   }
 
-  #save-controls button {
+  #save-controls button,
+  #dirtbike-save-controls button {
     width: 100%;
+  }
+
+  .bike-selection button,
+  .engine-selection button {
+    flex: 1 1 40%;
   }
 }
