@@ -1,169 +1,341 @@
-\
-**\* {**\&#xA;**&#x20; margin: 0;**\&#xA;**&#x20; padding: 0;**\&#xA;**&#x20; box-sizing: border-box;**\
-**}**\
-\
-**body {**\&#xA;**&#x20; background: #111;**\&#xA;**&#x20; color: white;**\&#xA;**&#x20; font-family: Arial, sans-serif;**\
-**}**\
-\
-**header {**\&#xA;**&#x20; background: #191919;**\&#xA;**&#x20; padding: 25px;**\&#xA;**&#x20; text-align: center;**\&#xA;**&#x20; border-bottom: 2px solid #d71920;**\
-**}**\
-\
-**header h1 {**\&#xA;**&#x20; letter-spacing: 4px;**\&#xA;**&#x20; font-size: 28px;**\
-**}**\
-\
-**header p {**\&#xA;**&#x20; color: #d71920;**\&#xA;**&#x20; margin-top: 8px;**\&#xA;**&#x20; letter-spacing: 3px;**\&#xA;**&#x20; font-size: 12px;**\
-**}**\
-\
-**main {**\&#xA;**&#x20; max-width: 1100px;**\&#xA;**&#x20; margin: auto;**\&#xA;**&#x20; padding: 25px;**\
-**}**\
-\
-**button {**\&#xA;**&#x20; background: #252525;**\&#xA;**&#x20; color: white;**\&#xA;**&#x20; border: 1px solid #444;**\&#xA;**&#x20; padding: 13px 20px;**\&#xA;**&#x20; border-radius: 7px;**\&#xA;**&#x20; cursor: pointer;**\&#xA;**&#x20; transition: background .2s, border-color .2s;**\
-**}**\
-\
-**button:hover {**\&#xA;**&#x20; background: #d71920;**\&#xA;**&#x20; border-color: #d71920;**\
-**}**\
-\
-**/\* PREVIEW \*/**\
-\
-**.preview {**\&#xA;**&#x20; background: #1c1c1c;**\&#xA;**&#x20; border: 1px solid #333;**\&#xA;**&#x20; border-radius: 12px;**\&#xA;**&#x20; padding: 25px;**\&#xA;**&#x20; min-height: 300px;**\
-**}**\
-\
-**.preview-label {**\&#xA;**&#x20; color: #d71920;**\&#xA;**&#x20; font-size: 12px;**\&#xA;**&#x20; letter-spacing: 2px;**\
-**}**\
-\
-**#bike-preview {**\&#xA;**&#x20; text-align: center;**\&#xA;**&#x20; padding: 25px 10px;**\
-**}**\
-\
-**#bike-preview h2 {**\&#xA;**&#x20; font-size: 25px;**\&#xA;**&#x20; margin-bottom: 15px;**\
-**}**\
-\
-**#bike-preview > p {**\&#xA;**&#x20; color: #888;**\
-**}**\
-\
-**.preview-canvas-holder {**\&#xA;**&#x20; width: 100%;**\&#xA;**&#x20; margin: auto;**\
-**}**\
-\
-**.bike-canvas {**\&#xA;**&#x20; position: relative;**\&#xA;**&#x20; overflow: hidden;**\
-**}**\
-\
-**.bike-canvas img {**\&#xA;**&#x20; pointer-events: none;**\&#xA;**&#x20; user-select: none;**\
-**}**\
-\
-**/\* SAVE \*/**\
-\
-**#save-controls {**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; flex-wrap: wrap;**\&#xA;**&#x20; justify-content: center;**\&#xA;**&#x20; gap: 10px;**\&#xA;**&#x20; margin-top: 15px;**\
-**}**\
-\
-**#editing-status {**\&#xA;**&#x20; color: #888;**\&#xA;**&#x20; font-size: 12px;**\&#xA;**&#x20; text-align: center;**\&#xA;**&#x20; margin-top: 12px;**\
-**}**\
-\
-**/\* FRAME ADJUSTMENTS \*/**\
-\
-**.custom-colors {**\&#xA;**&#x20; margin-top: 25px;**\&#xA;**&#x20; background: #1c1c1c;**\&#xA;**&#x20; border: 1px solid #333;**\&#xA;**&#x20; border-radius: 12px;**\&#xA;**&#x20; padding: 25px;**\
-**}**\
-\
-**.custom-colors h2 {**\&#xA;**&#x20; margin-bottom: 8px;**\
-**}**\
-\
-**.custom-colors > p {**\&#xA;**&#x20; color: #888;**\&#xA;**&#x20; font-size: 14px;**\&#xA;**&#x20; margin-bottom: 22px;**\
-**}**\
-\
-**.color-slider {**\&#xA;**&#x20; margin-bottom: 22px;**\
-**}**\
-\
-**.color-slider label {**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; justify-content: space-between;**\&#xA;**&#x20; margin-bottom: 10px;**\&#xA;**&#x20; font-size: 14px;**\
-**}**\
-\
-**.color-slider label span {**\&#xA;**&#x20; color: #d71920;**\&#xA;**&#x20; font-weight: bold;**\
-**}**\
-\
-**.color-slider input {**\&#xA;**&#x20; width: 100%;**\&#xA;**&#x20; accent-color: #d71920;**\&#xA;**&#x20; cursor: pointer;**\
-**}**\
-\
-**.reset-colors {**\&#xA;**&#x20; margin-top: 5px;**\
-**}**\
-\
-**/\* CUSTOMIZER \*/**\
-\
-**.customizer {**\&#xA;**&#x20; margin-top: 30px;**\
-**}**\
-\
-**.customizer h2 {**\&#xA;**&#x20; margin-bottom: 20px;**\
-**}**\
-\
-**.categories {**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; flex-wrap: wrap;**\&#xA;**&#x20; gap: 10px;**\
-**}**\
-\
-**#parts-list {**\&#xA;**&#x20; background: #1c1c1c;**\&#xA;**&#x20; padding: 25px;**\&#xA;**&#x20; margin-top: 15px;**\&#xA;**&#x20; border-radius: 10px;**\&#xA;**&#x20; color: #aaa;**\
-**}**\
-\
-**#parts-list h3 {**\&#xA;**&#x20; color: white;**\&#xA;**&#x20; margin-bottom: 20px;**\&#xA;**&#x20; text-transform: capitalize;**\
-**}**\
-\
-**.part-options {**\&#xA;**&#x20; display: grid;**\&#xA;**&#x20; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));**\&#xA;**&#x20; gap: 12px;**\
-**}**\
-\
-**#parts-list .part-option {**\&#xA;**&#x20; min-height: 110px;**\&#xA;**&#x20; padding: 8px;**\&#xA;**&#x20; font-size: 12px;**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; flex-direction: column;**\&#xA;**&#x20; align-items: center;**\&#xA;**&#x20; justify-content: center;**\&#xA;**&#x20; gap: 8px;**\
-**}**\
-\
-**#parts-list .part-option img {**\&#xA;**&#x20; width: 110px;**\&#xA;**&#x20; height: 70px;**\&#xA;**&#x20; max-width: 100%;**\&#xA;**&#x20; object-fit: contain;**\
-**}**\
-\
-**#parts-list .part-option.selected {**\&#xA;**&#x20; border: 2px solid #d71920;**\&#xA;**&#x20; background: #351719;**\
-**}**\
-\
-**/\* GARAGE \*/**\
-\
-**.garage {**\&#xA;**&#x20; background: #1c1c1c;**\&#xA;**&#x20; border: 1px solid #333;**\&#xA;**&#x20; border-radius: 12px;**\&#xA;**&#x20; padding: 25px;**\&#xA;**&#x20; margin-top: 30px;**\
-**}**\
-\
-**.garage-heading {**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; justify-content: space-between;**\&#xA;**&#x20; align-items: center;**\&#xA;**&#x20; flex-wrap: wrap;**\&#xA;**&#x20; gap: 15px;**\&#xA;**&#x20; margin-bottom: 20px;**\
-**}**\
-\
-**.garage-heading h2 {**\&#xA;**&#x20; margin-bottom: 7px;**\
-**}**\
-\
-**.garage-heading p {**\&#xA;**&#x20; color: #888;**\&#xA;**&#x20; font-size: 14px;**\
-**}**\
-\
-**#saved-bikes {**\&#xA;**&#x20; display: grid;**\&#xA;**&#x20; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));**\&#xA;**&#x20; gap: 15px;**\
-**}**\
-\
-**#saved-bikes > p {**\&#xA;**&#x20; color: #888;**\
-**}**\
-\
-**.garage-card {**\&#xA;**&#x20; background: #151515;**\&#xA;**&#x20; border: 1px solid #333;**\&#xA;**&#x20; border-radius: 10px;**\&#xA;**&#x20; padding: 15px;**\&#xA;**&#x20; min-width: 0;**\
-**}**\
-\
-**.garage-card h3 {**\&#xA;**&#x20; margin-bottom: 10px;**\&#xA;**&#x20; overflow-wrap: anywhere;**\
-**}**\
-\
-**.garage-bike-preview {**\&#xA;**&#x20; background: #202020;**\&#xA;**&#x20; border-radius: 8px;**\&#xA;**&#x20; padding: 5px;**\&#xA;**&#x20; margin-bottom: 12px;**\
-**}**\
-\
-**.bike-thumbnail {**\&#xA;**&#x20; max-width: 260px;**\
-**}**\
-\
-**.garage-buttons {**\&#xA;**&#x20; display: flex;**\&#xA;**&#x20; flex-wrap: wrap;**\&#xA;**&#x20; gap: 7px;**\
-**}**\
-\
-**.garage-buttons button {**\&#xA;**&#x20; flex: 1;**\&#xA;**&#x20; padding: 10px 8px;**\&#xA;**&#x20; font-size: 12px;**\
-**}**\
-\
-**.garage-buttons .delete-button {**\&#xA;**&#x20; border-color: #762326;**\&#xA;**&#x20; color: #ff7777;**\
-**}**\
-\
-**.garage-buttons .delete-button:hover {**\&#xA;**&#x20; background: #a51c22;**\&#xA;**&#x20; color: white;**\
-**}**\
-\
-**/\* MOBILE \*/**\
-\
-**@media (max-width: 600px) {**\&#xA;**&#x20; main {**\&#xA;**&#x20;   padding: 14px;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; header h1 {**\&#xA;**&#x20;   font-size: 22px;**\&#xA;**&#x20;   letter-spacing: 3px;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; .preview,**\&#xA;**&#x20; .garage,**\&#xA;**&#x20; .custom-colors {**\&#xA;**&#x20;   padding: 17px;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; .garage-heading {**\&#xA;**&#x20;   align-items: flex-start;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; .garage-buttons {**\&#xA;**&#x20;   flex-direction: column;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; .garage-buttons button {**\&#xA;**&#x20;   width: 100%;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; #save-controls {**\&#xA;**&#x20;   flex-direction: column;**\&#xA;**&#x20; }**\
-\&#xA;**&#x20; #save-controls button {**\&#xA;**&#x20;   width: 100%;**\&#xA;**&#x20; }**\
-**}**
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #191919;
+  padding: 25px;
+  text-align: center;
+  border-bottom: 2px solid #d71920;
+}
+
+header h1 {
+  letter-spacing: 4px;
+  font-size: 28px;
+}
+
+header p {
+  color: #d71920;
+  margin-top: 8px;
+  letter-spacing: 3px;
+  font-size: 12px;
+}
+
+main {
+  max-width: 1100px;
+  margin: auto;
+  padding: 25px;
+}
+
+button {
+  background: #252525;
+  color: white;
+  border: 1px solid #444;
+  padding: 13px 20px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+
+button:hover {
+  background: #d71920;
+  border-color: #d71920;
+}
+
+/* PREVIEW */
+
+.preview {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+  min-height: 300px;
+}
+
+.preview-label {
+  color: #d71920;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+#bike-preview {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+#bike-preview h2 {
+  font-size: 25px;
+  margin-bottom: 15px;
+}
+
+#bike-preview > p {
+  color: #888;
+}
+
+.preview-canvas-holder {
+  width: 100%;
+  margin: auto;
+}
+
+.bike-canvas {
+  position: relative;
+  overflow: hidden;
+}
+
+.bike-canvas img {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* SAVE */
+
+#save-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+#editing-status {
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* FRAME ADJUSTMENTS */
+
+.custom-colors {
+  margin-top: 25px;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.custom-colors h2 {
+  margin-bottom: 8px;
+}
+
+.custom-colors > p {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 22px;
+}
+
+.color-slider {
+  margin-bottom: 22px;
+}
+
+.color-slider label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.color-slider label span {
+  color: #d71920;
+  font-weight: bold;
+}
+
+.color-slider input {
+  width: 100%;
+  accent-color: #d71920;
+  cursor: pointer;
+}
+
+.reset-colors {
+  margin-top: 5px;
+}
+
+/* CUSTOMIZER */
+
+.customizer {
+  margin-top: 30px;
+}
+
+.customizer h2 {
+  margin-bottom: 20px;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#parts-list {
+  background: #1c1c1c;
+  padding: 25px;
+  margin-top: 15px;
+  border-radius: 10px;
+  color: #aaa;
+}
+
+#parts-list h3 {
+  color: white;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.part-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+  gap: 12px;
+}
+
+#parts-list .part-option {
+  min-height: 110px;
+  padding: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#parts-list .part-option img {
+  width: 110px;
+  height: 70px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+#parts-list .part-option.selected {
+  border: 2px solid #d71920;
+  background: #351719;
+}
+
+/* GARAGE */
+
+.garage {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+  margin-top: 30px;
+}
+
+.garage-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.garage-heading h2 {
+  margin-bottom: 7px;
+}
+
+.garage-heading p {
+  color: #888;
+  font-size: 14px;
+}
+
+#saved-bikes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 15px;
+}
+
+#saved-bikes > p {
+  color: #888;
+}
+
+.garage-card {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  min-width: 0;
+}
+
+.garage-card h3 {
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.garage-bike-preview {
+  background: #202020;
+  border-radius: 8px;
+  padding: 5px;
+  margin-bottom: 12px;
+}
+
+.bike-thumbnail {
+  max-width: 260px;
+}
+
+.garage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.garage-buttons button {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12px;
+}
+
+.garage-buttons .delete-button {
+  border-color: #762326;
+  color: #ff7777;
+}
+
+.garage-buttons .delete-button:hover {
+  background: #a51c22;
+  color: white;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  main {
+    padding: 14px;
+  }
+
+  header h1 {
+    font-size: 22px;
+    letter-spacing: 3px;
+  }
+
+  .preview,
+  .garage,
+  .custom-colors {
+    padding: 17px;
+  }
+
+  .garage-heading {
+    align-items: flex-start;
+  }
+
+  .garage-buttons {
+    flex-direction: column;
+  }
+
+  .garage-buttons button {
+    width: 100%;
+  }
+
+  #save-controls {
+    flex-direction: column;
+  }
+
+  #save-controls button {
+    width: 100%;
+  }
+}
