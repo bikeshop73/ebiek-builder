@@ -1,14 +1,26 @@
+
+/* =========================================
+   SUPER73 ZX SE BUILDER
+   COMPLETE STYLESHEET
+========================================= */
+
+/* RESET */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* BODY */
+
 body {
   background: #111;
   color: white;
   font-family: Arial, sans-serif;
 }
+
+/* HEADER */
 
 header {
   background: #191919;
@@ -29,11 +41,15 @@ header p {
   font-size: 12px;
 }
 
+/* MAIN */
+
 main {
   max-width: 1100px;
   margin: auto;
   padding: 25px;
 }
+
+/* BUTTONS */
 
 button {
   background: #252525;
@@ -43,6 +59,7 @@ button {
   border-radius: 7px;
   cursor: pointer;
   transition: background .2s, border-color .2s;
+  font-family: inherit;
 }
 
 button:hover {
@@ -50,7 +67,14 @@ button:hover {
   border-color: #d71920;
 }
 
-/* PREVIEW */
+button:focus-visible {
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   PREVIEW
+========================================= */
 
 .preview {
   background: #1c1c1c;
@@ -93,9 +117,12 @@ button:hover {
 .bike-canvas img {
   pointer-events: none;
   user-select: none;
+  -webkit-user-drag: none;
 }
 
-/* SAVE */
+/* =========================================
+   SAVE CONTROLS
+========================================= */
 
 #save-controls {
   display: flex;
@@ -112,7 +139,44 @@ button:hover {
   margin-top: 12px;
 }
 
-/* FRAME ADJUSTMENTS */
+/* =========================================
+   PERFORMANCE
+========================================= */
+
+.bike-performance {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  padding: 15px;
+  border-radius: 10px;
+  background: #202020;
+  color: white;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.bike-performance > div {
+  min-width: 100px;
+}
+
+.bike-performance > div > div {
+  font-size: 11px;
+  opacity: .7;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.bike-performance strong {
+  display: block;
+  font-size: 20px;
+  color: #d71920;
+}
+
+/* =========================================
+   FRAME ADJUSTMENTS
+========================================= */
 
 .custom-colors {
   margin-top: 25px;
@@ -158,7 +222,9 @@ button:hover {
   margin-top: 5px;
 }
 
-/* CUSTOMIZER */
+/* =========================================
+   CUSTOMIZER
+========================================= */
 
 .customizer {
   margin-top: 30px;
@@ -172,6 +238,10 @@ button:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.categories button {
+  flex: 0 0 auto;
 }
 
 #parts-list {
@@ -190,7 +260,10 @@ button:hover {
 
 .part-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(125px, 1fr)
+  );
   gap: 12px;
 }
 
@@ -203,6 +276,7 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  overflow-wrap: anywhere;
 }
 
 #parts-list .part-option img {
@@ -217,7 +291,9 @@ button:hover {
   background: #351719;
 }
 
-/* GARAGE */
+/* =========================================
+   GARAGE
+========================================= */
 
 .garage {
   background: #1c1c1c;
@@ -247,7 +323,10 @@ button:hover {
 
 #saved-bikes {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(240px, 1fr)
+  );
   gap: 15px;
 }
 
@@ -279,6 +358,24 @@ button:hover {
   max-width: 260px;
 }
 
+/* COMPONENT INFORMATION */
+
+.bike-components {
+  margin: 12px 0;
+  padding: 12px;
+  background: #202020;
+  border-radius: 8px;
+}
+
+.bike-components p {
+  color: #aaa;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+/* GARAGE BUTTONS */
+
 .garage-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -301,11 +398,18 @@ button:hover {
   color: white;
 }
 
-/* MOBILE */
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 600px) {
+
   main {
     padding: 14px;
+  }
+
+  header {
+    padding: 20px 12px;
   }
 
   header h1 {
@@ -337,5 +441,20 @@ button:hover {
 
   #save-controls button {
     width: 100%;
+  }
+
+  .bike-performance {
+    gap: 15px;
+  }
+
+  #parts-list {
+    padding: 15px;
+  }
+
+  .part-options {
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(105px, 1fr)
+    );
   }
 }
