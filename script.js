@@ -1,7 +1,8 @@
+
 /* =========================================
    SUPER73 ZX SE BUILDER
-   COMPLETE SCRIPT
-   BRAKES + CHAIN
+   COMPLETE REWRITTEN SCRIPT
+   BRAKES + CHAIN + BATTERY PERFORMANCE FIX
 ========================================= */
 
 /* =========================================
@@ -79,9 +80,7 @@ const parts = {
     "IMG_6060.PNG"
   ],
 
-  chain: [
-    "IMG_6061.PNG"
-  ],
+  chain: ["IMG_6061.PNG"],
 
   controller: [
     "Stock",
@@ -287,7 +286,7 @@ const allowedAccessoryPairs = [
 
 
 /* =========================================
-   BIKE IMAGE LAYERS
+   IMAGE LAYERS
 ========================================= */
 
 const layers = [
@@ -310,7 +309,8 @@ const layers = [
 
 
 /* =========================================
-   PERFORMANCE CALCULATOR
+   BATTERY PERFORMANCE FIX
+   USE BEST EQUIPPED BATTERY
 ========================================= */
 
 function getPerformanceStats(partsToCheck) {
@@ -321,21 +321,16 @@ function getPerformanceStats(partsToCheck) {
 
   if (!partsToCheck) return zeroStats;
 
-  const batterySelection = partsToCheck.battery;
+  const batterySelection = Array.isArray(partsToCheck.battery)
+    ? partsToCheck.battery
+    : partsToCheck.battery
+      ? [partsToCheck.battery]
+      : [];
 
-  if (
-    !Array.isArray(batterySelection) ||
-    batterySelection.length !== 1
-  ) {
-    return zeroStats;
-  }
-
-  const motorFilename = partsToCheck.motor;
-  const controller = partsToCheck.controller;
-
-  if (!motorFilename || !controller) {
-    return zeroStats;
-  }
+  const motorNames = {
+    "IMG_5959.PNG": "1350W",
+    "IMG_5993.PNG": "4000W"
+  };
 
   const batteryNames = {
     "IMG_5984.PNG": "Surron",
@@ -344,31 +339,46 @@ function getPerformanceStats(partsToCheck) {
     "IMG_7000.PNG": "Handleworks"
   };
 
-  const motorNames = {
-    "IMG_5959.PNG": "1350W",
-    "IMG_5993.PNG": "4000W"
-  };
+  const motorName = motorNames[partsToCheck.motor];
+  const controller = partsToCheck.controller;
 
-  const batteryName = batteryNames[batterySelection[0]];
-  const motorName = motorNames[motorFilename];
-
-  if (!batteryName || !motorName) {
+  if (!motorName || !controller || !batterySelection.length) {
     return zeroStats;
   }
 
-  const combination =
-    performanceDatabase[batteryName + "|" + motorName];
+  let bestStats = zeroStats;
 
-  if (!combination || !combination[controller]) {
-    return zeroStats;
-  }
+  batterySelection.forEach(filename => {
+    const batteryName = batteryNames[filename];
 
-  const result = combination[controller];
+    if (!batteryName) return;
 
-  return {
-    topSpeed: result[0],
-    wattage: result[1]
-  };
+    const combination =
+      performanceDatabase[batteryName + "|" + motorName];
+
+    if (!combination || !combination[controller]) return;
+
+    const result = combination[controller];
+
+    const candidate = {
+      topSpeed: result[0],
+      wattage: result[1]
+    };
+
+    // Highest wattage wins.
+    // If wattage is tied, highest speed wins.
+    if (
+      candidate.wattage > bestStats.wattage ||
+      (
+        candidate.wattage === bestStats.wattage &&
+        candidate.topSpeed > bestStats.topSpeed
+      )
+    ) {
+      bestStats = candidate;
+    }
+  });
+
+  return bestStats;
 }
 
 
@@ -460,7 +470,7 @@ function getLayerPosition(category, position) {
       width: "24%",
       height: "24%"
     },
-     
+
     brakes: {
       left: "-2%",
       top: "-2%",
@@ -559,6 +569,7 @@ function createBikeCanvas(
         objectFit: "contain",
         zIndex: String(layerIndex + 1),
         pointerEvents: "none",
+        userSelect: "none",
         maxWidth: "none"
       });
 
@@ -611,6 +622,29 @@ function updatePreview() {
     selectedParts,
     selectedColors
   );
+
+  updatePerformanceDisplay();
+}
+
+
+/* =========================================
+   LIVE PERFORMANCE DISPLAY
+========================================= */
+
+function updatePerformanceDisplay() {
+  const performance = getPerformanceStats(selectedParts);
+
+  const speedElement = document.getElementById("preview-speed");
+  const wattageElement = document.getElementById("preview-wattage");
+
+  if (speedElement) {
+    speedElement.textContent = performance.topSpeed + " MPH";
+  }
+
+  if (wattageElement) {
+    wattageElement.textContent =
+      performance.wattage.toLocaleString() + "W";
+  }
 }
 
 
@@ -783,7 +817,7 @@ function selectPart(category, filename, index) {
     return;
   }
 
-  // Batteries and accessories: up to two selections.
+  // Battery and accessories: up to two selections.
   if (category === "battery" || category === "accessories") {
     let current = selectedParts[category] || [];
 
@@ -831,7 +865,7 @@ function selectPart(category, filename, index) {
     }
 
   } else {
-    // Brakes, chain, wheels, frame, etc.: single selection.
+    // Single-selection categories.
     if (selectedParts[category] === filename) {
       delete selectedParts[category];
     } else {
@@ -883,7 +917,7 @@ function storeSavedBikes(bikes) {
 
 
 /* =========================================
-   CREATE SAVED BIKE DATA
+   CREATE BIKE DATA
 ========================================= */
 
 function createBikeData(name) {
@@ -891,16 +925,13 @@ function createBikeData(name) {
 
   return {
     id: Date.now(),
-    name: name,
+    name,
 
     parts: JSON.parse(JSON.stringify(selectedParts)),
 
     colors: { ...selectedColors },
 
-    performance: {
-      topSpeed: performance.topSpeed,
-      wattage: performance.wattage
-    }
+    performance: { ...performance }
   };
 }
 
@@ -1133,59 +1164,37 @@ function showSavedBikes() {
       true
     );
 
+    // Always calculate from equipped parts.
     const stats = getPerformanceStats(bike.parts || {});
 
-    bike.performance = stats;
+    bike.performance = { ...stats };
 
-    // PERFORMANCE DISPLAY.
     const performance = document.createElement("div");
     performance.className = "bike-performance";
 
-    Object.assign(performance.style, {
-      display: "flex",
-      justifyContent: "center",
-      gap: "24px",
-      flexWrap: "wrap",
-      margin: "12px 0",
-      padding: "12px",
-      borderRadius: "10px",
-      background: "#202020",
-      color: "white",
-      textAlign: "center"
-    });
-
     const speed = document.createElement("div");
-    const speedLabel = document.createElement("div");
 
+    const speedLabel = document.createElement("div");
     speedLabel.textContent = "TOP SPEED";
-    speedLabel.style.fontSize = "11px";
-    speedLabel.style.opacity = "0.7";
 
     const speedValue = document.createElement("strong");
     speedValue.textContent = stats.topSpeed + " MPH";
-    speedValue.style.fontSize = "20px";
 
     speed.append(speedLabel, speedValue);
 
     const power = document.createElement("div");
-    const powerLabel = document.createElement("div");
 
+    const powerLabel = document.createElement("div");
     powerLabel.textContent = "WATTAGE";
-    powerLabel.style.fontSize = "11px";
-    powerLabel.style.opacity = "0.7";
 
     const powerValue = document.createElement("strong");
-
     powerValue.textContent =
       stats.wattage.toLocaleString() + "W";
-
-    powerValue.style.fontSize = "20px";
 
     power.append(powerLabel, powerValue);
 
     performance.append(speed, power);
 
-    // COMPONENT INFORMATION.
     const components = document.createElement("div");
     components.className = "bike-components";
 
@@ -1197,7 +1206,9 @@ function showSavedBikes() {
       ? batterySelection
           .map(item => batteryLabels[item] || item)
           .join(" + ")
-      : "None";
+      : batterySelection
+        ? batteryLabels[batterySelection] || batterySelection
+        : "None";
 
     const motorText =
       motorLabels[bike.parts?.motor] || "None";
@@ -1220,7 +1231,6 @@ function showSavedBikes() {
 
     components.appendChild(componentNames);
 
-    // GARAGE BUTTONS.
     const buttons = document.createElement("div");
     buttons.className = "garage-buttons";
 
@@ -1314,11 +1324,15 @@ function initializeBuilder() {
   updateEditingStatus();
 
   console.log(
-    "SUPER73 ZX SE Builder loaded successfully with brakes and chain."
+    "SUPER73 ZX SE Builder loaded successfully."
   );
 }
 
-// Works whether the script loads before or after the page DOM.
+
+/* =========================================
+   START APPLICATION
+========================================= */
+
 if (document.readyState === "loading") {
   document.addEventListener(
     "DOMContentLoaded",
