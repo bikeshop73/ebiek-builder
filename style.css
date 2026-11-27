@@ -1,3 +1,4 @@
+
 * {
   margin: 0;
   padding: 0;
@@ -8,6 +9,10 @@ body {
   background: #111;
   color: white;
   font-family: Arial, sans-serif;
+}
+
+body.ride-active {
+  overflow: hidden;
 }
 
 header {
@@ -52,11 +57,16 @@ button:hover {
 
 /* PREVIEW */
 
-.preview {
+.preview,
+.custom-colors,
+.garage {
   background: #1c1c1c;
   border: 1px solid #333;
   border-radius: 12px;
   padding: 25px;
+}
+
+.preview {
   min-height: 300px;
 }
 
@@ -76,10 +86,6 @@ button:hover {
   margin-bottom: 15px;
 }
 
-#bike-preview > p {
-  color: #888;
-}
-
 .preview-canvas-holder {
   width: 100%;
   margin: auto;
@@ -88,6 +94,7 @@ button:hover {
 .bike-canvas {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .bike-canvas img {
@@ -95,7 +102,25 @@ button:hover {
   user-select: none;
 }
 
-/* SAVE */
+.performance-preview {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  text-align: center;
+  margin: 15px;
+}
+
+.performance-preview div {
+  color: #999;
+  font-size: 11px;
+}
+
+.performance-preview strong {
+  display: block;
+  color: white;
+  font-size: 21px;
+  margin-top: 6px;
+}
 
 #save-controls {
   display: flex;
@@ -112,14 +137,10 @@ button:hover {
   margin-top: 12px;
 }
 
-/* FRAME COLOR */
+/* COLORS */
 
 .custom-colors {
   margin-top: 25px;
-  background: #1c1c1c;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 25px;
 }
 
 .custom-colors h2 {
@@ -201,10 +222,6 @@ button:hover {
 /* GARAGE */
 
 .garage {
-  background: #1c1c1c;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 25px;
   margin-top: 30px;
 }
 
@@ -251,6 +268,33 @@ button:hover {
   max-width: 260px;
 }
 
+.bike-performance {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.bike-performance strong {
+  display: block;
+  color: white;
+  margin-top: 5px;
+  font-size: 17px;
+}
+
+.bike-performance div {
+  color: #888;
+  font-size: 10px;
+}
+
+.bike-components {
+  color: #999;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+
 .garage-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -267,8 +311,6 @@ button:hover {
   border-color: #762326;
   color: #ff7777;
 }
-
-/* RIDE BUTTON */
 
 .ride-button {
   background: #d71920 !important;
@@ -335,7 +377,7 @@ button:hover {
   font-size: 20px;
 }
 
-/* 2D WORLD */
+/* WORLD */
 
 #ride-world {
   position: relative;
@@ -373,6 +415,7 @@ button:hover {
   width: min(52vw, 550px);
   transform-origin: 15% 85%;
   will-change: transform;
+  z-index: 5;
 }
 
 #ride-bike-container .bike-canvas {
@@ -383,6 +426,15 @@ button:hover {
 
 #ride-bike-container img {
   position: absolute;
+}
+
+#ride-sparks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .ride-controls {
@@ -402,7 +454,34 @@ button:hover {
 
 /* MOBILE */
 
-@media (max-width: 600px) {
+.mobile-ride-controls {
+  display: none;
+  background: #191919;
+  padding: 12px;
+  gap: 9px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  touch-action: none;
+}
+
+.mobile-ride-controls button {
+  min-width: 65px;
+  min-height: 55px;
+  font-size: 13px;
+  font-weight: bold;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobile-ride-controls button.pressed {
+  background: #d71920;
+  border-color: #ff4444;
+  transform: scale(.96);
+}
+
+@media (max-width: 768px) {
   main {
     padding: 14px;
   }
@@ -434,59 +513,12 @@ button:hover {
   }
 
   .ride-hud {
-    gap: 18px;
-  }
-
-  #ride-bike-container {
-    width: 75vw;
-    left: 10%;
-  }
-
-  .ride-controls {
     gap: 12px;
-    font-size: 10px;
-  }
-}
-
-
-/* =========================================
-   MOBILE RIDING CONTROLS
-========================================= */
-
-.mobile-ride-controls {
-  display: none;
-  background: #191919;
-  padding: 12px;
-  gap: 9px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  touch-action: none;
-}
-
-.mobile-ride-controls button {
-  min-width: 65px;
-  min-height: 55px;
-  font-size: 13px;
-  font-weight: bold;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.mobile-ride-controls button.pressed {
-  background: #d71920;
-  border-color: #ff4444;
-  transform: scale(.96);
-}
-
-@media (max-width: 768px) {
-  .mobile-ride-controls {
-    display: flex;
+    padding: 10px 4px;
   }
 
-  .ride-controls {
-    display: none;
+  .ride-hud strong {
+    font-size: 15px;
   }
 
   #ride-bike-container {
@@ -494,22 +526,12 @@ button:hover {
     left: 5%;
   }
 
-  .ride-hud {
-    gap: 12px;
-    padding: 10px 4px;
+  .ride-controls {
+    display: none;
   }
 
-  .ride-hud strong {
-    font-size: 16px;
-  }
-
-  .ride-header {
-    padding: 10px;
-  }
-
-  .ride-header button {
-    padding: 9px;
-    font-size: 11px;
+  .mobile-ride-controls {
+    display: flex;
   }
 
   #ride-world {
