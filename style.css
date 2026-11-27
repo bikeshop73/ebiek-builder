@@ -1,26 +1,15 @@
 
-/* =========================================
-   SUPER73 ZX SE BUILDER
-   COMPLETE STYLESHEET
-========================================= */
-
-/* RESET */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* BODY */
-
 body {
   background: #111;
   color: white;
   font-family: Arial, sans-serif;
 }
-
-/* HEADER */
 
 header {
   background: #191919;
@@ -41,15 +30,11 @@ header p {
   font-size: 12px;
 }
 
-/* MAIN */
-
 main {
   max-width: 1100px;
   margin: auto;
   padding: 25px;
 }
-
-/* BUTTONS */
 
 button {
   background: #252525;
@@ -59,7 +44,6 @@ button {
   border-radius: 7px;
   cursor: pointer;
   transition: background .2s, border-color .2s;
-  font-family: inherit;
 }
 
 button:hover {
@@ -67,14 +51,7 @@ button:hover {
   border-color: #d71920;
 }
 
-button:focus-visible {
-  outline: 2px solid #d71920;
-  outline-offset: 3px;
-}
-
-/* =========================================
-   PREVIEW
-========================================= */
+/* PREVIEW */
 
 .preview {
   background: #1c1c1c;
@@ -117,12 +94,9 @@ button:focus-visible {
 .bike-canvas img {
   pointer-events: none;
   user-select: none;
-  -webkit-user-drag: none;
 }
 
-/* =========================================
-   SAVE CONTROLS
-========================================= */
+/* SAVE */
 
 #save-controls {
   display: flex;
@@ -139,44 +113,7 @@ button:focus-visible {
   margin-top: 12px;
 }
 
-/* =========================================
-   PERFORMANCE
-========================================= */
-
-.bike-performance {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin: 12px 0;
-  padding: 15px;
-  border-radius: 10px;
-  background: #202020;
-  color: white;
-  text-align: center;
-  border: 1px solid #333;
-}
-
-.bike-performance > div {
-  min-width: 100px;
-}
-
-.bike-performance > div > div {
-  font-size: 11px;
-  opacity: .7;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
-}
-
-.bike-performance strong {
-  display: block;
-  font-size: 20px;
-  color: #d71920;
-}
-
-/* =========================================
-   FRAME ADJUSTMENTS
-========================================= */
+/* FRAME COLOR */
 
 .custom-colors {
   margin-top: 25px;
@@ -187,13 +124,7 @@ button:focus-visible {
 }
 
 .custom-colors h2 {
-  margin-bottom: 8px;
-}
-
-.custom-colors > p {
-  color: #888;
-  font-size: 14px;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .color-slider {
@@ -201,30 +132,16 @@ button:focus-visible {
 }
 
 .color-slider label {
-  display: flex;
-  justify-content: space-between;
+  display: block;
   margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.color-slider label span {
-  color: #d71920;
-  font-weight: bold;
 }
 
 .color-slider input {
   width: 100%;
   accent-color: #d71920;
-  cursor: pointer;
 }
 
-.reset-colors {
-  margin-top: 5px;
-}
-
-/* =========================================
-   CUSTOMIZER
-========================================= */
+/* CUSTOMIZER */
 
 .customizer {
   margin-top: 30px;
@@ -240,10 +157,6 @@ button:focus-visible {
   gap: 10px;
 }
 
-.categories button {
-  flex: 0 0 auto;
-}
-
 #parts-list {
   background: #1c1c1c;
   padding: 25px;
@@ -255,15 +168,11 @@ button:focus-visible {
 #parts-list h3 {
   color: white;
   margin-bottom: 20px;
-  text-transform: capitalize;
 }
 
 .part-options {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(125px, 1fr)
-  );
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
   gap: 12px;
 }
 
@@ -276,7 +185,6 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  overflow-wrap: anywhere;
 }
 
 #parts-list .part-option img {
@@ -291,9 +199,7 @@ button:focus-visible {
   background: #351719;
 }
 
-/* =========================================
-   GARAGE
-========================================= */
+/* GARAGE */
 
 .garage {
   background: #1c1c1c;
@@ -312,10 +218,6 @@ button:focus-visible {
   margin-bottom: 20px;
 }
 
-.garage-heading h2 {
-  margin-bottom: 7px;
-}
-
 .garage-heading p {
   color: #888;
   font-size: 14px;
@@ -323,15 +225,8 @@ button:focus-visible {
 
 #saved-bikes {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(240px, 1fr)
-  );
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 15px;
-}
-
-#saved-bikes > p {
-  color: #888;
 }
 
 .garage-card {
@@ -339,7 +234,6 @@ button:focus-visible {
   border: 1px solid #333;
   border-radius: 10px;
   padding: 15px;
-  min-width: 0;
 }
 
 .garage-card h3 {
@@ -358,24 +252,6 @@ button:focus-visible {
   max-width: 260px;
 }
 
-/* COMPONENT INFORMATION */
-
-.bike-components {
-  margin: 12px 0;
-  padding: 12px;
-  background: #202020;
-  border-radius: 8px;
-}
-
-.bike-components p {
-  color: #aaa;
-  font-size: 12px;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-/* GARAGE BUTTONS */
-
 .garage-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -393,46 +269,153 @@ button:focus-visible {
   color: #ff7777;
 }
 
-.garage-buttons .delete-button:hover {
-  background: #a51c22;
-  color: white;
+/* RIDE BUTTON */
+
+.ride-button {
+  background: #d71920 !important;
+  border-color: #d71920 !important;
+  font-weight: bold;
+  width: 100%;
+  margin-bottom: 8px;
 }
 
-/* =========================================
-   MOBILE
-========================================= */
+/* RIDING SCREEN */
+
+.ride-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #101010;
+  overflow: hidden;
+}
+
+.ride-screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.ride-header {
+  background: #191919;
+  border-bottom: 2px solid #d71920;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.ride-header h2 {
+  font-size: 17px;
+  text-align: center;
+}
+
+.ride-header button {
+  padding: 10px 14px;
+}
+
+.ride-hud {
+  display: flex;
+  justify-content: center;
+  gap: 45px;
+  padding: 15px;
+  background: #181818;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.ride-hud div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+}
+
+.ride-hud strong {
+  color: white;
+  font-size: 20px;
+}
+
+/* 2D WORLD */
+
+#ride-world {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    #72a7d5 0%,
+    #a8d1e8 65%,
+    #d5e2e8 100%
+  );
+}
+
+#ride-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 300%;
+  height: 28%;
+  background:
+    linear-gradient(
+      to bottom,
+      #555 0px,
+      #333 8px,
+      #242424 100%
+    );
+  border-top: 5px solid #d71920;
+  will-change: transform;
+}
+
+#ride-bike-container {
+  position: absolute;
+  left: 20%;
+  bottom: 15%;
+  width: min(52vw, 550px);
+  transform-origin: 15% 85%;
+  will-change: transform;
+}
+
+#ride-bike-container .bike-canvas {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 1 / 1;
+}
+
+#ride-bike-container img {
+  position: absolute;
+}
+
+.ride-controls {
+  background: #191919;
+  padding: 17px;
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #ddd;
+}
+
+.ride-controls span {
+  white-space: nowrap;
+}
+
+/* MOBILE */
 
 @media (max-width: 600px) {
-
   main {
     padding: 14px;
   }
 
-  header {
-    padding: 20px 12px;
-  }
-
   header h1 {
     font-size: 22px;
-    letter-spacing: 3px;
   }
 
   .preview,
   .garage,
   .custom-colors {
     padding: 17px;
-  }
-
-  .garage-heading {
-    align-items: flex-start;
-  }
-
-  .garage-buttons {
-    flex-direction: column;
-  }
-
-  .garage-buttons button {
-    width: 100%;
   }
 
   #save-controls {
@@ -443,18 +426,25 @@ button:focus-visible {
     width: 100%;
   }
 
-  .bike-performance {
-    gap: 15px;
+  .garage-buttons {
+    flex-direction: column;
   }
 
-  #parts-list {
-    padding: 15px;
+  .ride-header h2 {
+    font-size: 12px;
   }
 
-  .part-options {
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(105px, 1fr)
-    );
+  .ride-hud {
+    gap: 18px;
+  }
+
+  #ride-bike-container {
+    width: 75vw;
+    left: 10%;
+  }
+
+  .ride-controls {
+    gap: 12px;
+    font-size: 10px;
   }
 }
