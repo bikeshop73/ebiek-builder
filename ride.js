@@ -284,11 +284,17 @@ const RideGame = {
 
     this.angle += this.angularVelocity*dt;
 
+    // WHEELIE ANGLE LIMIT
     this.angle = Math.max(
-      -10,
-      Math.min(75,this.angle)
+      -110,
+      Math.min(75, this.angle)
     );
 
+     // CRASH IF BIKE GOES PAST -110 DEGREES
+if (this.angle <= -110) {
+  this.restart();
+  return;
+}
     /* AIR TIME */
 
     if (this.angle>8 && this.speed>2) {
