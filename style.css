@@ -636,3 +636,152 @@ button:hover {
     touch-action: none;
   }
 }
+
+/* =========================================
+   STEEZY STUNTER-STYLE RIDING ENVIRONMENT
+========================================= */
+
+#ride-world {
+  --world-scroll: 0px;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #63a8df 0%,
+      #a9d6ed 48%,
+      #e3d7b9 75%,
+      #849b65 100%
+    );
+}
+
+/* Distant hills, skyline and clouds */
+#ride-world::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background-image:
+    radial-gradient(ellipse at 15% 18%, white 0 2%, transparent 3%),
+    radial-gradient(ellipse at 60% 12%, white 0 2%, transparent 3%),
+    linear-gradient(160deg, transparent 55%, #78966c 56% 70%, transparent 71%),
+    linear-gradient(200deg, transparent 52%, #66885e 53% 72%, transparent 73%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 90px,
+      #526b60 91px 105px,
+      transparent 106px 150px
+    );
+
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    450px 65%;
+
+  background-position:
+    0 0,
+    0 0,
+    calc(var(--world-scroll) * -0.08) bottom,
+    calc(var(--world-scroll) * -0.12) bottom,
+    calc(var(--world-scroll) * -0.2) bottom;
+
+  background-repeat: no-repeat, no-repeat, repeat-x, repeat-x, repeat-x;
+}
+
+/* Foreground scenery */
+#ride-world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 125px,
+      #303d35 126px 132px,
+      transparent 133px 190px
+    );
+
+  background-size: 650px 45%;
+  background-position:
+    calc(var(--world-scroll) * -0.45) bottom;
+  background-repeat: repeat-x;
+  opacity: .65;
+}
+
+/* Road */
+#ride-ground {
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  left: 0;
+  width: 300%;
+  height: 28%;
+
+  background-color: #303235;
+
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 95px,
+      #e6d9ad 96px 150px,
+      transparent 151px 245px
+    );
+
+  background-size: 245px 5px;
+  background-repeat: repeat-x;
+  background-position:
+    calc(var(--world-scroll) * -1) 18px;
+
+  border-top: 5px solid #d71920;
+  box-shadow: 0 -8px 20px rgba(0,0,0,.2);
+  will-change: transform;
+}
+
+/* Bike stays in its riding position */
+#ride-bike-container {
+  position: absolute;
+  z-index: 5;
+
+  left: 20%;
+  bottom: 15%;
+
+  width: min(52vw, 550px);
+
+  transform-origin: 13.5% 65%;
+
+  will-change: transform;
+}
+
+#ride-bike-container .bike-canvas {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+}
+
+/* Sparks above the scenery */
+#ride-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #ride-bike-container {
+    width: 85vw;
+    left: 5%;
+  }
+}
+
