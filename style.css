@@ -488,20 +488,51 @@ button:hover {
 
 /* MOBILE CONTROLS */
 
+
 .mobile-ride-controls {
   display: none;
-
   background: #191919;
   padding: 12px;
-
   gap: 9px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-
   touch-action: none;
-  z-index: 30;
+  position: relative;
+  z-index: 100;
 }
+
+.mobile-ride-controls button {
+  min-width: 65px;
+  min-height: 55px;
+  font-size: 13px;
+  font-weight: bold;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-ride-controls button.pressed {
+  background: #d71920;
+  border-color: #ff4444;
+  transform: scale(.96);
+}
+
+@media (max-width: 768px) {
+  .mobile-ride-controls {
+    display: flex;
+  }
+
+  .ride-controls {
+    display: none;
+  }
+
+  #ride-world {
+    touch-action: none;
+  }
+}
+
 
 .mobile-ride-controls button {
   min-width: 65px;
