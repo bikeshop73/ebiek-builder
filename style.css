@@ -408,15 +408,19 @@ button:hover {
   will-change: transform;
 }
 
+
 #ride-bike-container {
   position: absolute;
   left: 20%;
   bottom: 15%;
   width: min(52vw, 550px);
-  transform-origin: 15% 85%;
+
+  /* Rear wheel center pivot */
+  transform-origin: 17.5% 65.5%;
+
   will-change: transform;
-  z-index: 5;
 }
+
 
 #ride-bike-container .bike-canvas {
   width: 100%;
