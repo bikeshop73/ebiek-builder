@@ -368,7 +368,7 @@ function getLayerPosition(category, position) {
     },
 
     brakes: {
-      left:"-2%",top:"-2%",width:"105%",height:"105%"
+      left:"-2%",top:"-1%",width:"105%",height:"105%"
     },
 
     fenders: {
