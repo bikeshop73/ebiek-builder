@@ -427,9 +427,9 @@ const RideGame = {
     });
 
     // MOTOR ROTATION
-    this.motorImages.forEach(img => {
-      img.style.transform =
-        `rotate(${this.motorRotation}deg)`;
+    motorImages.forEach(img => {
+      img.style.transformOrigin = "50% 42%";
+      img.style.transform = `rotate(${this.motorRotation}deg)`;
     });
 
     this.drawSparks();
