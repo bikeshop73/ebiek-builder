@@ -1,9 +1,7 @@
 
 /* =========================================
    SUPER73 2D RIDING ENGINE
-   COMPLETE REWRITE
-   MOTOR + WHEEL PHYSICS + WHEELIE MODE
-   KEYBOARD + MOBILE CONTROLS
+   FIXED ANGLE DIRECTION + WHEELIE PHYSICS
 ========================================= */
 
 const RideGame = {
@@ -12,15 +10,14 @@ const RideGame = {
 
   speed: 0,
   distance: 0,
+
+  // Negative angles are wheelies.
   angle: 0,
   angularVelocity: 0,
 
   maxSpeed: 0,
-
   acceleration: 0.12,
-  braking: 0.35,
-
-  wheelieMode: false,
+  braking: 0.25,
 
   keys: {},
   animation: null,
@@ -30,12 +27,10 @@ const RideGame = {
 
   rearRotation: 0,
   frontRotation: 0,
-  motorRotation: 0,
 
-  frontAirborne: false,
-  frontWheelStopped: false,
-
+  wheelieMode: false,
   wheelieTime: 0,
+  frontWheelStopped: false,
 
   hasTires: true,
   tireSpeedMultiplier: 1,
@@ -55,84 +50,52 @@ const RideGame = {
   rearWheelImages: [],
   motorImages: [],
 
-  mobilePointers: new Map(),
-
-  /* =====================================
-     START
-  ===================================== */
-
   start(bike) {
     if (!bike) return;
-
-    this.stop();
 
     this.bike = bike;
 
     this.speed = 0;
     this.distance = 0;
-
     this.angle = 0;
     this.angularVelocity = 0;
-
     this.worldOffset = 0;
 
     this.rearRotation = 0;
     this.frontRotation = 0;
-    this.motorRotation = 0;
 
-    this.frontAirborne = false;
-    this.frontWheelStopped = false;
-
-    this.wheelieTime = 0;
     this.wheelieMode = false;
+    this.wheelieTime = 0;
+    this.frontWheelStopped = false;
 
     this.sparks = [];
     this.keys = {};
-    this.mobilePointers.clear();
 
     const stats = getPerformanceStats(bike.parts || {});
 
     this.maxSpeed = Number(stats.topSpeed) || 0;
 
     if (this.maxSpeed <= 0) {
-      alert(
-        "This bike cannot move! Install a compatible battery, motor and controller."
-      );
-
-      this.bike = null;
+      alert("This bike cannot move. Check its battery, motor and controller.");
       return;
     }
 
-    const selectedTires = bike.parts?.tires;
-
     this.hasTires =
-      Array.isArray(selectedTires) &&
-      selectedTires.length >= 2;
+      Array.isArray(bike.parts?.tires) &&
+      bike.parts.tires.length > 0;
 
     this.tireSpeedMultiplier = this.hasTires ? 1 : 0.28;
 
     const screen = document.getElementById("ride-screen");
 
-    if (!screen) {
-      console.error("Ride screen missing.");
-      return;
-    }
+    if (!screen) return;
 
-    this.container = document.getElementById(
-      "ride-bike-container"
-    );
-
+    this.container = document.getElementById("ride-bike-container");
     this.ground = document.getElementById("ride-ground");
-
-    if (!this.container || !this.ground) {
-      console.error("Ride elements missing.");
-      return;
-    }
 
     screen.classList.add("active");
 
-    document.getElementById("ride-bike-name").textContent =
-      bike.name;
+    document.getElementById("ride-bike-name").textContent = bike.name;
 
     this.renderBike();
     this.createSparkCanvas();
@@ -147,13 +110,8 @@ const RideGame = {
     document.body.style.overflow = "hidden";
 
     this.updateHUD();
-
     this.loop();
   },
-
-  /* =====================================
-     RENDER BIKE
-  ===================================== */
 
   renderBike() {
     this.container.innerHTML = "";
@@ -168,70 +126,59 @@ const RideGame = {
       }
     );
 
-    canvas.style.width = "100%";
     canvas.style.maxWidth = "none";
+    canvas.style.width = "100%";
 
-    const images = canvas.querySelectorAll("img");
+    this.frontWheelImages = [
+      ...canvas.querySelectorAll('img[alt="frontWheel"]')
+    ];
 
-    this.frontWheelImages = [];
-    this.rearWheelImages = [];
-    this.motorImages = [];
+    this.rearWheelImages = [
+      ...canvas.querySelectorAll('img[alt="rearWheel"]')
+    ];
 
-    const tireImages = [];
+    const tires = [
+      ...canvas.querySelectorAll('img[alt="tires"]')
+    ];
 
-    images.forEach(img => {
-      if (img.alt === "frontWheel") {
-        this.frontWheelImages.push(img);
-      }
-
-      if (img.alt === "rearWheel") {
-        this.rearWheelImages.push(img);
-      }
-
-      if (img.alt === "tires") {
-        tireImages.push(img);
-      }
-
-      if (img.alt === "motor") {
-        this.motorImages.push(img);
-      }
-    });
-
-    // Tire layers are rendered rear first, then front.
-    if (tireImages.length >= 2) {
-      this.rearWheelImages.push(tireImages[0]);
-      this.frontWheelImages.push(tireImages[1]);
-    } else if (tireImages.length === 1) {
-      this.rearWheelImages.push(tireImages[0]);
+    // Tire layers are added rear first, then front.
+    if (tires.length >= 2) {
+      this.rearWheelImages.push(tires[0]);
+      this.frontWheelImages.push(tires[1]);
+    } else if (tires.length === 1) {
+      this.rearWheelImages.push(tires[0]);
     }
 
-    [
-      ...this.frontWheelImages,
-      ...this.rearWheelImages,
-      ...this.motorImages
-    ].forEach(img => {
+    this.motorImages = [
+      ...canvas.querySelectorAll('img[alt="motor"]')
+    ];
+
+    // Rotate around the CENTER of the rear wheel.
+    // Rear wheel center = approximately 17.5%, 65.5%.
+    this.container.style.transformOrigin = "17.5% 65.5%";
+
+    this.frontWheelImages.forEach(img => {
       img.style.transformOrigin = "center center";
     });
 
-    // Rotate around the rear wheel center.
-    this.container.style.transformOrigin = "17.5% 65.5%";
-  },
+    this.rearWheelImages.forEach(img => {
+      img.style.transformOrigin = "center center";
+    });
 
-  /* =====================================
-     MAIN LOOP
-  ===================================== */
+    this.motorImages.forEach(img => {
+      img.style.transformOrigin = "center center";
+    });
+  },
 
   loop() {
     if (!this.active) return;
 
-    this.animation = requestAnimationFrame(() => {
-      this.loop();
-    });
+    this.animation = requestAnimationFrame(() => this.loop());
 
     const now = performance.now();
 
     const dt = Math.min(
-      (now - this.lastTime) / 16.67,
+      (now - this.lastTime) / 16.667,
       2
     );
 
@@ -240,10 +187,6 @@ const RideGame = {
     this.update(dt);
     this.draw();
   },
-
-  /* =====================================
-     PHYSICS
-  ===================================== */
 
   update(dt) {
     const keys = this.keys;
@@ -260,17 +203,17 @@ const RideGame = {
     if (brake) {
       this.speed -= this.braking * dt;
 
-      // Braking pushes the front wheel down.
-      this.angularVelocity += 0.11 * dt;
+      // Braking always brings the front wheel down.
+      this.angularVelocity += 0.18 * dt;
 
-      if (this.angle < 0) {
-        this.angularVelocity += 0.12 * dt;
+      this.angle += 0.9 * dt;
+
+      if (this.angle > 0) {
+        this.angle = 0;
       }
-
-      this.wheelieMode = false;
     }
 
-    // FRICTION
+    // NATURAL FRICTION
     if (!gas && !brake) {
       this.speed *= Math.pow(0.997, dt);
     }
@@ -285,110 +228,100 @@ const RideGame = {
     );
 
     // WHEELIE MODE
+    // CTRL toggles wheelie mode.
+    // D then pulls the front wheel up.
+
     if (this.wheelieMode && gas && this.speed > 2) {
-      this.angularVelocity -= 0.13 * dt;
+      this.angularVelocity -= 0.16 * dt;
     }
 
-    // BALANCE LEFT
+    // BALANCE
     if (keys.ArrowLeft || keys.balanceLeft) {
-      this.angularVelocity -= 0.045 * dt;
+      this.angularVelocity -= 0.035 * dt;
     }
 
-    // BALANCE RIGHT
     if (keys.ArrowRight || keys.balanceRight) {
-      this.angularVelocity += 0.045 * dt;
+      this.angularVelocity += 0.035 * dt;
     }
 
     // GRAVITY
-    if (this.angle < 0) {
-      this.angularVelocity += 0.0035 * dt;
+    // Only pulls the wheelie back toward zero.
+    if (this.angle < 0 && !brake) {
+      const gravity =
+        0.0035 * Math.abs(Math.sin(this.angle * Math.PI / 180));
+
+      this.angularVelocity += gravity * dt;
     }
 
-    // AIR RESISTANCE
-    this.angularVelocity *= Math.pow(0.985, dt);
+    // AIR AND GROUND DAMPING
+    this.angularVelocity *= Math.pow(
+      brake ? 0.88 : 0.985,
+      dt
+    );
 
-    // ANGLE
     this.angle += this.angularVelocity * dt;
 
-    // WHEELIE LIMIT
-    if (this.angle < -110) {
+    // ABSOLUTE ANGLE LIMITS.
+    // POSITIVE ANGLES ARE IMPOSSIBLE.
+    this.angle = Math.max(
+      -110,
+      Math.min(0, this.angle)
+    );
+
+    // If the bike reaches -110 degrees,
+    // automatically restart the run.
+    if (this.angle <= -110) {
       this.restart();
       return;
     }
 
-    // PREVENT FALLING TOO FAR BACKWARD
-    this.angle = Math.max(-110, this.angle);
+    // FRONT WHEEL AIR TIME
+    if (this.angle < -8 && this.speed > 2) {
+      this.wheelieTime += dt * 16.667;
 
-    // FRONT WHEEL AIRBORNE
-    this.frontAirborne = this.angle < -5;
-
-    if (this.frontAirborne) {
-      this.wheelieTime += dt * 16.67;
+      if (this.wheelieTime >= 25000) {
+        this.frontWheelStopped = true;
+      }
     } else {
       this.wheelieTime = 0;
+      this.frontWheelStopped = false;
     }
 
     // FRONT WHEEL RETURNS TO GROUND
-    if (!this.frontAirborne && !this.wheelieMode) {
-      this.angle *= Math.pow(0.97, dt);
-
-      if (Math.abs(this.angle) < 0.15) {
-        this.angle = 0;
-        this.angularVelocity = 0;
-      }
+    if (!this.wheelieMode && !gas && !brake) {
+      this.angularVelocity += 0.025 * dt;
     }
 
-    // BRAKING HELPS LOWER FRONT
-    if (brake && this.angle < 0) {
-      this.angle += Math.min(
-        Math.abs(this.angle),
-        0.12 * dt
-      );
+    // NEVER ALLOW POSITIVE ANGLES.
+    if (this.angle > 0) {
+      this.angle = 0;
+      this.angularVelocity = 0;
     }
 
     // WHEEL ROTATION
-    // Ground scroll distance determines wheel rotation.
-    const movement = this.speed * dt * 2;
+    const wheelSpin = this.speed * 0.12 * dt;
 
-    const wheelRadius = 75;
-
-    const wheelSpin =
-      (movement / wheelRadius) * (180 / Math.PI);
-
-    // REAR WHEEL
     this.rearRotation += wheelSpin;
 
-    // MOTOR
-    this.motorRotation += wheelSpin;
-
-    // FRONT WHEEL
-    if (!this.frontAirborne) {
-      this.frontRotation = this.rearRotation;
-      this.frontWheelStopped = false;
+    // Front wheel slows down gradually in the air.
+    if (this.frontWheelStopped) {
+      this.frontRotation *= Math.pow(0.985, dt);
     } else {
-      // Gradually freewheel to a stop.
-      if (!this.frontWheelStopped) {
-        this.frontRotation +=
-          wheelSpin * 0.25 * dt;
-
-        this.frontRotation *= Math.pow(0.985, dt);
-
-        if (
-          Math.abs(this.frontRotation) <
-          0.1
-        ) {
-          this.frontWheelStopped = true;
-        }
-      }
+      this.frontRotation += wheelSpin;
     }
 
+    // MOTOR ROTATION
+    // Slightly above the motor's center.
+    this.motorRotation =
+      (this.motorRotation || 0) + wheelSpin;
+
     // DISTANCE
-    this.distance += movement / 60;
+    this.distance += this.speed * dt / 60;
 
     // BACKGROUND MOVEMENT
-    this.worldOffset += movement;
+    this.worldOffset += this.speed * dt * 2;
 
-    // SPARKS
+    // SPARKS ONLY WITHOUT TIRES
     if (!this.hasTires && this.speed > 1) {
       this.createSparks(dt);
       this.updateScrapeSound();
@@ -399,20 +332,18 @@ const RideGame = {
     this.updateHUD();
   },
 
-  /* =====================================
-     DRAW
-  ===================================== */
-
   draw() {
     if (!this.container) return;
 
-    // BIKE ROTATION AROUND REAR WHEEL
+    // NEGATIVE ROTATION = WHEELIE.
+    // Rear wheel stays at the pivot.
     this.container.style.transform =
-      `rotate(${this.angle}deg)`;
+      `rotate(${Math.min(0, this.angle)}deg)`;
 
-    // MOVING WORLD
-    this.ground.style.transform =
-      `translateX(-${this.worldOffset % 400}px)`;
+    if (this.ground) {
+      this.ground.style.transform =
+        `translateX(-${this.worldOffset % 400}px)`;
+    }
 
     // REAR WHEEL
     this.rearWheelImages.forEach(img => {
@@ -426,61 +357,36 @@ const RideGame = {
         `rotate(${this.frontRotation}deg)`;
     });
 
-    // MOTOR ROTATION
-    motorImages.forEach(img => {
-      img.style.transformOrigin = "50% 42%";
-      img.style.transform = `rotate(${this.motorRotation}deg)`;
+    // MOTOR
+    this.motorImages.forEach(img => {
+      img.style.transformOrigin = "50% 47%";
+
+      img.style.transform =
+        `rotate(${this.motorRotation || 0}deg)`;
     });
 
     this.drawSparks();
   },
-
-  /* =====================================
-     HUD
-  ===================================== */
 
   updateHUD() {
     const speed = document.getElementById("ride-speed");
     const distance = document.getElementById("ride-distance");
     const angle = document.getElementById("ride-angle");
 
-    if (speed) {
-      speed.textContent =
-        Math.round(this.speed) + " MPH";
-    }
+    if (speed) speed.textContent =
+      Math.round(this.speed) + " MPH";
 
-    if (distance) {
-      distance.textContent =
-        Math.round(this.distance) + " FT";
-    }
+    if (distance) distance.textContent =
+      Math.round(this.distance) + " FT";
 
-    if (angle) {
-      angle.textContent =
-        Math.round(Math.abs(this.angle)) + "°";
-    }
-
-    const modeButton = document.querySelector(
-      '[data-control="wheelieToggle"]'
-    );
-
-    if (modeButton) {
-      modeButton.textContent = this.wheelieMode
-        ? "WHEELIE ON"
-        : "WHEELIE OFF";
-
-      modeButton.classList.toggle(
-        "pressed",
-        this.wheelieMode
-      );
-    }
+    if (angle) angle.textContent =
+      Math.round(this.angle) + "°";
   },
-
-  /* =====================================
-     SPARKS
-  ===================================== */
 
   createSparkCanvas() {
     const world = document.getElementById("ride-world");
+
+    if (!world) return;
 
     let canvas = document.getElementById("ride-sparks");
 
@@ -511,25 +417,17 @@ const RideGame = {
 
     const rect = this.sparkCanvas.getBoundingClientRect();
 
-    const ratio = window.devicePixelRatio || 1;
-
-    this.sparkCanvas.width = rect.width * ratio;
-    this.sparkCanvas.height = rect.height * ratio;
-
-    this.sparkContext.setTransform(
-      ratio, 0, 0, ratio, 0, 0
-    );
+    this.sparkCanvas.width = rect.width;
+    this.sparkCanvas.height = rect.height;
   },
 
   createSparks(dt) {
     if (!this.sparkCanvas) return;
 
-    const rect = this.sparkCanvas.getBoundingClientRect();
-
     if (Math.random() < 0.65) {
       this.sparks.push({
-        x: rect.width * 0.25,
-        y: rect.height * 0.77,
+        x: this.sparkCanvas.width * 0.25,
+        y: this.sparkCanvas.height * 0.77,
         vx: -Math.random() * 5,
         vy: -Math.random() * 4,
         life: 1
@@ -539,7 +437,6 @@ const RideGame = {
     this.sparks.forEach(spark => {
       spark.x += spark.vx * dt;
       spark.y += spark.vy * dt;
-
       spark.vy += 0.15 * dt;
       spark.life -= 0.025 * dt;
     });
@@ -554,9 +451,11 @@ const RideGame = {
 
     const ctx = this.sparkContext;
 
-    const rect = this.sparkCanvas.getBoundingClientRect();
-
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.clearRect(
+      0, 0,
+      this.sparkCanvas.width,
+      this.sparkCanvas.height
+    );
 
     this.sparks.forEach(spark => {
       ctx.globalAlpha = spark.life;
@@ -573,26 +472,20 @@ const RideGame = {
     ctx.globalAlpha = 1;
   },
 
-  /* =====================================
-     AUDIO
-  ===================================== */
-
   startAudio() {
     try {
-      const AudioClass =
-        window.AudioContext ||
-        window.webkitAudioContext;
+      const Audio =
+        window.AudioContext || window.webkitAudioContext;
 
-      if (!AudioClass) return;
+      if (!Audio) return;
 
       if (!this.audioContext) {
-        this.audioContext = new AudioClass();
+        this.audioContext = new Audio();
       }
 
       if (this.audioContext.state === "suspended") {
         this.audioContext.resume();
       }
-
     } catch (error) {
       console.warn("Audio unavailable:", error);
     }
@@ -639,34 +532,23 @@ const RideGame = {
     );
   },
 
-  /* =====================================
-     MOBILE CONTROLS
-  ===================================== */
-
   createMobileControls() {
     const screen = document.getElementById("ride-screen");
 
-    let controls = document.getElementById(
-      "mobile-ride-controls"
-    );
+    let controls = document.getElementById("mobile-ride-controls");
 
-    if (!controls) {
-      controls = document.createElement("div");
+    if (controls) controls.remove();
 
-      controls.id = "mobile-ride-controls";
-      controls.className = "mobile-ride-controls";
-
-      screen.appendChild(controls);
-    }
-
-    controls.innerHTML = "";
+    controls = document.createElement("div");
+    controls.id = "mobile-ride-controls";
+    controls.className = "mobile-ride-controls";
 
     const buttons = [
       ["brake", "BRAKE"],
       ["gas", "GAS"],
       ["balanceLeft", "◀"],
       ["balanceRight", "▶"],
-      ["wheelieToggle", "WHEELIE OFF"]
+      ["wheelie", "POP"]
     ];
 
     buttons.forEach(([key, label]) => {
@@ -676,47 +558,34 @@ const RideGame = {
       button.textContent = label;
       button.dataset.control = key;
 
-      button.addEventListener("pointerdown", event => {
+      const press = event => {
         event.preventDefault();
 
-        if (key === "wheelieToggle") {
-          this.wheelieMode = !this.wheelieMode;
-          this.updateHUD();
-          return;
-        }
-
-        this.keys[key] = true;
-
-        this.mobilePointers.set(
-          event.pointerId,
-          key
-        );
-
-        try {
-          button.setPointerCapture(event.pointerId);
-        } catch (error) {
-          console.warn("Pointer capture unavailable.");
+        if (key === "wheelie") {
+          if (!button.dataset.wasPressed) {
+            this.wheelieMode = !this.wheelieMode;
+            button.dataset.wasPressed = "true";
+          }
+        } else {
+          this.keys[key] = true;
         }
 
         button.classList.add("pressed");
-      });
+      };
 
       const release = event => {
-        const control = this.mobilePointers.get(
-          event.pointerId
-        );
+        event.preventDefault();
 
-        if (!control) return;
-
-        this.keys[control] = false;
-
-        this.mobilePointers.delete(
-          event.pointerId
-        );
+        if (key === "wheelie") {
+          button.dataset.wasPressed = "";
+        } else {
+          this.keys[key] = false;
+        }
 
         button.classList.remove("pressed");
       };
 
+      button.addEventListener("pointerdown", press);
       button.addEventListener("pointerup", release);
       button.addEventListener("pointercancel", release);
       button.addEventListener("lostpointercapture", release);
@@ -724,12 +593,8 @@ const RideGame = {
       controls.appendChild(button);
     });
 
-    this.updateHUD();
+    screen.appendChild(controls);
   },
-
-  /* =====================================
-     RESTART
-  ===================================== */
 
   restart() {
     if (!this.active) return;
@@ -746,25 +611,18 @@ const RideGame = {
     this.frontRotation = 0;
     this.motorRotation = 0;
 
-    this.frontAirborne = false;
-    this.frontWheelStopped = false;
-
-    this.wheelieTime = 0;
     this.wheelieMode = false;
+    this.wheelieTime = 0;
+    this.frontWheelStopped = false;
 
     this.sparks = [];
     this.keys = {};
-    this.mobilePointers.clear();
 
     this.stopScrapeSound();
 
     this.draw();
     this.updateHUD();
   },
-
-  /* =====================================
-     STOP
-  ===================================== */
 
   stop() {
     this.active = false;
@@ -774,29 +632,23 @@ const RideGame = {
     }
 
     this.animation = null;
-
     this.keys = {};
-    this.mobilePointers.clear();
 
     this.stopScrapeSound();
 
     const screen = document.getElementById("ride-screen");
 
-    if (screen) {
-      screen.classList.remove("active");
-    }
+    if (screen) screen.classList.remove("active");
 
     document.body.style.overflow = "";
+
+    this.bike = null;
 
     const controls = document.getElementById(
       "mobile-ride-controls"
     );
 
-    if (controls) controls.innerHTML = "";
-
-    this.bike = null;
-    this.container = null;
-    this.ground = null;
+    if (controls) controls.remove();
   }
 };
 
@@ -822,29 +674,20 @@ window.addEventListener("keydown", event => {
     event.preventDefault();
   }
 
-  // CTRL TOGGLES WHEELIE MODE
-  if (
-    event.code === "ControlLeft" &&
-    !event.repeat
-  ) {
+  if (event.code === "ControlLeft" && !event.repeat) {
     RideGame.wheelieMode = !RideGame.wheelieMode;
-    RideGame.updateHUD();
-    return;
-  }
-
-  // RESTART
-  if (event.code === "KeyR" && !event.repeat) {
-    RideGame.restart();
-    return;
-  }
-
-  // EXIT
-  if (event.code === "Escape" && !event.repeat) {
-    exitRide();
     return;
   }
 
   RideGame.keys[event.code] = true;
+
+  if (event.code === "KeyR" && !event.repeat) {
+    RideGame.restart();
+  }
+
+  if (event.code === "Escape" && !event.repeat) {
+    exitRide();
+  }
 });
 
 window.addEventListener("keyup", event => {
@@ -853,7 +696,6 @@ window.addEventListener("keyup", event => {
 
 window.addEventListener("blur", () => {
   RideGame.keys = {};
-  RideGame.mobilePointers.clear();
 });
 
 
@@ -883,13 +725,7 @@ function addRideButtons() {
     button.className = "ride-button";
 
     button.onclick = () => {
-      const latestBike = getSavedBikes().find(
-        item => item.id === bike.id
-      );
-
-      if (latestBike) {
-        RideGame.start(latestBike);
-      }
+      RideGame.start(bike);
     };
 
     buttons.insertBefore(button, buttons.firstChild);
@@ -908,15 +744,11 @@ function initializeRideSystem() {
 
   if (!garage) return;
 
-  if (window.rideGarageObserver) {
-    window.rideGarageObserver.disconnect();
-  }
-
-  window.rideGarageObserver = new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
     addRideButtons();
   });
 
-  window.rideGarageObserver.observe(garage, {
+  observer.observe(garage, {
     childList: true,
     subtree: true
   });
@@ -934,17 +766,6 @@ function exitRide() {
 function restartRide() {
   RideGame.restart();
 }
-
-
-/* =========================================
-   RESIZE
-========================================= */
-
-window.addEventListener("resize", () => {
-  if (RideGame.active) {
-    RideGame.resizeSparkCanvas();
-  }
-});
 
 
 /* =========================================
