@@ -626,3 +626,32 @@ button:hover {
     transition: none;
   }
 }
+
+#ride-world {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+#ride-scenery {
+  pointer-events: none;
+  will-change: transform;
+}
+
+#ride-ground {
+  will-change: transform;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #292929 0px,
+      #292929 80px,
+      #444 81px,
+      #444 84px,
+      #292929 85px,
+      #292929 160px
+    );
+}
+
+#ride-bike-container img {
+  backface-visibility: hidden;
+}
